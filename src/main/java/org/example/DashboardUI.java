@@ -4,14 +4,15 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class DashboardUI extends Application {
     private Stage primaryStage;
+    private StackPane contentArea;
 
     @Override
     public void start(Stage primaryStage) {
@@ -31,18 +32,23 @@ public class DashboardUI extends Application {
 
         // Create navigation buttons
         Button dashboardButton = createNavButton("Dashboard");
-        Button storageButton = createNavButton("Manage Storage");
-        Button productButton = createNavButton("Manage Products");
-        Button staffButton = createNavButton("Manage Staff");
-        Button ordersButton = createNavButton("Manage Orders");
+        Button storageButton = createNavButton("Quản lý kho");
+        Button productButton = createNavButton("Quản lý sản phẩm");
+        Button staffButton = createNavButton("Quản lý nhân viên");
+        Button ordersButton = createNavButton("Quản lý hóa đơn");
 
-        drawer.getChildren().addAll(dashboardButton, storageButton, productButton, staffButton, ordersButton);
+        Button[] buttons = {dashboardButton, storageButton, productButton, staffButton, ordersButton};
+        for (Button btn : buttons) {
+            btn.setMaxHeight(Double.MAX_VALUE);
+            VBox.setVgrow(btn, Priority.ALWAYS);
+            btn.setPadding(new Insets(10));
+        }
 
+        drawer.getChildren().addAll(buttons);
         // Create main content area
-        StackPane contentArea = new StackPane();
-        Text placeholderText = new Text("Select an option from the drawer");
-        placeholderText.setFont(Font.font("Arial", 16));
-        contentArea.getChildren().add(placeholderText);
+        contentArea = new StackPane();
+        // Set dashboard as the initial content
+        contentArea.getChildren().add(DashboardStats.createDashboardContent());
 
         // Add components to main layout
         mainLayout.setLeft(drawer);
@@ -56,11 +62,8 @@ public class DashboardUI extends Application {
 
         // Add action listeners for navigation buttons
         dashboardButton.setOnAction(e -> {
-            try {
-                new ReportsUI().start(new Stage());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(DashboardStats.createDashboardContent());
         });
         storageButton.setOnAction(e -> {
             try {
