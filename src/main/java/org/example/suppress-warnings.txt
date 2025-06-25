@@ -1,0 +1,52 @@
+To suppress warnings in DashboardUI.java and DashboardStats.java, you have two main options:
+
+1. Use the SuppressWarnings annotation at the class or method level:
+
+In DashboardUI.java, add this at the class level:
+```java
+@SuppressWarnings("unused")
+public class DashboardUI extends Application {
+    // ...
+}
+```
+
+2. Modify your code to use method references instead of lambdas where possible:
+
+```java
+// Instead of:
+button.setOnAction(e -> someMethod());
+
+// Use:
+button.setOnAction(this::someMethod);
+
+// And define:
+private void someMethod(ActionEvent e) {
+    // your code here
+}
+```
+
+3. For unused lambda parameters, use an underscore "_" to indicate it's intentionally unused:
+
+```java
+colCustNo.setCellFactory(_ -> new TableCell<>() {
+    @Override
+    protected void updateItem(Void item, boolean empty) {
+        super.updateItem(item, empty);
+        setText(empty ? null : String.valueOf(getIndex() + 1));
+    }
+});
+```
+
+4. For type safety warnings with varargs in TableColumn.addAll(), replace with individual add() calls:
+
+```java
+// Instead of:
+table.getColumns().addAll(col1, col2, col3);
+
+// Use:
+table.getColumns().add(col1);
+table.getColumns().add(col2);
+table.getColumns().add(col3);
+```
+
+NOTE: The unused getter methods in the static inner classes of DashboardStats.java are required by JavaFX's PropertyValueFactory. They're used via reflection, which is why the IDE can't detect the usage.

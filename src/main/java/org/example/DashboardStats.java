@@ -27,36 +27,83 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 
-public class DashboardStats{
-
+@SuppressWarnings("unused") // Suppress warnings for unused getters and lambda parameters
+public class DashboardStats {
+    @SuppressWarnings("unused") // Suppress warnings for unused getters required by JavaFX properties
     private static class Invoice {
         String invoiceNumber, salesperson, status, customer, date;
         double amount;
+
         Invoice(String i, String s, String st, String c, String d, double a) {
-            invoiceNumber = i; salesperson = s; status = st; customer = c; date = d; amount = a;
+            invoiceNumber = i;
+            salesperson = s;
+            status = st;
+            customer = c;
+            date = d;
+            amount = a;
         }
-        public String getInvoiceNumber() { return invoiceNumber; }
-        public String getSalesperson() { return salesperson; }
-        public String getStatus() { return status; }
-        public String getCustomer() { return customer; }
-        public String getDate() { return date; }
-        public double getAmount() { return amount; }
+
+        public String getInvoiceNumber() {
+            return invoiceNumber;
+        }
+
+        public String getSalesperson() {
+            return salesperson;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public String getCustomer() {
+            return customer;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public double getAmount() {
+            return amount;
+        }
     }
 
+    @SuppressWarnings("unused") // Suppress warnings for unused getters required by JavaFX properties
     private static class CustomerStat {
         String customer;
         double total;
-        CustomerStat(String c, double t) { customer = c; total = t; }
-        public String getCustomer() { return customer; }
-        public double getTotal() { return total; }
+
+        CustomerStat(String c, double t) {
+            customer = c;
+            total = t;
+        }
+
+        public String getCustomer() {
+            return customer;
+        }
+
+        public double getTotal() {
+            return total;
+        }
     }
 
+    @SuppressWarnings("unused") // Suppress warnings for unused getters required by JavaFX properties
     private static class CategoryStat {
         String category;
         double total;
-        CategoryStat(String c, double t) { category = c; total = t; }
-        public String getCategory() { return category; }
-        public double getTotal() { return total; }
+
+        CategoryStat(String c, double t) {
+            category = c;
+            total = t;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public double getTotal() {
+            return total;
+        }
     }
 
     public static VBox createDashboardContent() {
@@ -114,15 +161,17 @@ public class DashboardStats{
                         .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
                         .limit(5)
                         .map(e -> new CustomerStat(e.getKey(), e.getValue()))
-                        .toList()
-        );
+                        .toList());
         TableColumn<CustomerStat, Void> colCustNo = new TableColumn<>("STT");
-        colCustNo.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty ? null : String.valueOf(getIndex() + 1));
-            }
+        colCustNo.setCellFactory(col -> {
+            // Lambda parameter not used, but required by interface
+            return new TableCell<CustomerStat, Void>() {
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty ? null : String.valueOf(getIndex() + 1));
+                }
+            };
         });
         colCustNo.setPrefWidth(50); // Small width for numbering
 
@@ -135,7 +184,9 @@ public class DashboardStats{
         colCustTotal.setPrefWidth(200);
 
         customerTable.setItems(customerStats);
-        customerTable.getColumns().addAll(colCustNo, colCustName, colCustTotal);
+        customerTable.getColumns().add(colCustNo);
+        customerTable.getColumns().add(colCustName);
+        customerTable.getColumns().add(colCustTotal);
 
         // Top Categories Table
         TableView<CategoryStat> categoryTable = new TableView<>();
@@ -144,15 +195,17 @@ public class DashboardStats{
                         .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
                         .limit(5)
                         .map(e -> new CategoryStat(e.getKey(), e.getValue()))
-                        .toList()
-        );
+                        .toList());
         TableColumn<CategoryStat, Void> colCatNo = new TableColumn<>("STT");
-        colCatNo.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty ? null : String.valueOf(getIndex() + 1));
-            }
+        colCatNo.setCellFactory(col -> {
+            // Lambda parameter not used, but required by interface
+            return new TableCell<CategoryStat, Void>() {
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty ? null : String.valueOf(getIndex() + 1));
+                }
+            };
         });
         colCatNo.setPrefWidth(50);
 
@@ -165,14 +218,15 @@ public class DashboardStats{
         colCatTotal.setPrefWidth(200);
 
         categoryTable.setItems(categoryStats);
-        categoryTable.getColumns().addAll(colCatNo, colCatName, colCatTotal);
+        categoryTable.getColumns().add(colCatNo);
+        categoryTable.getColumns().add(colCatName);
+        categoryTable.getColumns().add(colCatTotal);
 
         // Layout
         VBox vbox = new VBox(20,
                 new Label("Doanh thu theo tháng"), revenueChart,
                 new Label("Khách hàng hàng đầu"), customerTable,
-                new Label("Thể loại yêu thích"), categoryTable
-        );
+                new Label("Thể loại yêu thích"), categoryTable);
         vbox.setPadding(new Insets(20));
         return vbox;
     }

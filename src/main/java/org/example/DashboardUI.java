@@ -13,6 +13,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+@SuppressWarnings("unused") // Suppress warnings for unused lambda parameters
 public class DashboardUI extends Application {
     private Stage primaryStage;
     private BorderPane mainLayout;
@@ -64,12 +65,16 @@ public class DashboardUI extends Application {
         Scene scene = new Scene(mainLayout, 1000, 700);
         primaryStage.setTitle("Book Store Management System");
         primaryStage.setScene(scene);
-        primaryStage.show(); // Add action listeners for navigation buttons using method references
-                             // dashboardButton.setOnAction(event -> showDashboardContent());
-        storageButton.setOnAction(event -> showStorageUI());
-        productButton.setOnAction(event -> showProductsUI());
-        staffButton.setOnAction(event -> showStaffUI());
-        ordersButton.setOnAction(event -> showOrdersUI());
+        primaryStage.show(); // Add action listeners for navigation buttons
+        dashboardButton.setOnAction(e -> showDashboardContent());
+        storageButton.setOnAction(e -> showStorageUI());
+        productButton.setOnAction(e -> showProductsUI());
+        staffButton.setOnAction(e -> showStaffUI());
+        ordersButton.setOnAction(e -> showOrdersUI());
+
+        // Add a class-level SuppressWarnings annotation to handle the unused lambda
+        // parameter warnings
+        // @SuppressWarnings("unused")
     }
 
     private Button createNavButton(String text) {
