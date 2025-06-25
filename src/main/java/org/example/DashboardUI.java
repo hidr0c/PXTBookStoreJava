@@ -3,23 +3,19 @@ package org.example;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;<<<<<<<HEAD
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;=======
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.*;>>>>>>>b3fe551(uploading UI)
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class DashboardUI extends Application {
-    private Stage primaryStage;<<<<<<<HEAD=======
-    private BorderPane mainLayout;>>>>>>>
-
-    b3fe551 (uploading UI)
-
+    private Stage primaryStage;
+    private BorderPane mainLayout;
     private StackPane contentArea;
 
     @Override
@@ -69,11 +65,11 @@ public class DashboardUI extends Application {
         primaryStage.setTitle("Book Store Management System");
         primaryStage.setScene(scene);
         primaryStage.show(); // Add action listeners for navigation buttons using method references
-        dashboardButton.setOnAction(e -> showDashboardContent());
-        storageButton.setOnAction(e -> showStorageUI());
-        productButton.setOnAction(e -> showProductsUI());
-        staffButton.setOnAction(e -> showStaffUI());
-        ordersButton.setOnAction(e -> showOrdersUI());
+                             // dashboardButton.setOnAction(event -> showDashboardContent());
+        storageButton.setOnAction(event -> showStorageUI());
+        productButton.setOnAction(event -> showProductsUI());
+        staffButton.setOnAction(event -> showStaffUI());
+        ordersButton.setOnAction(event -> showOrdersUI());
     }
 
     private Button createNavButton(String text) {
