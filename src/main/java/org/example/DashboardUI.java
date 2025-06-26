@@ -14,7 +14,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-@SuppressWarnings("unused") // Suppress warnings for unused lambda parameters
+@SuppressWarnings("unused")
 public class DashboardUI extends Application {
     private Stage primaryStage;
     private BorderPane mainLayout;
@@ -27,16 +27,13 @@ public class DashboardUI extends Application {
     }
 
     public void showDashboard() {
-        // Create main layout
         mainLayout = new BorderPane();
 
-        // Create drawer (left side navigation)
         VBox drawer = new VBox(10);
         drawer.setPadding(new Insets(10));
         drawer.setStyle("-fx-background-color: #f0f0f0;");
         drawer.setPrefWidth(200);
 
-        // Create navigation buttons
         Button dashboardButton = createNavButton("Dashboard");
         Button storageButton = createNavButton("Quản lý kho");
         Button productButton = createNavButton("Quản lý sản phẩm");
@@ -51,18 +48,13 @@ public class DashboardUI extends Application {
         }
 
         drawer.getChildren().addAll(buttons);
-        // Create main content area
         contentArea = new StackPane();
         contentArea.setPadding(new Insets(20));
-
-        // Show dashboard content by default
         showDashboardContent();
 
-        // Add components to main layout
         mainLayout.setLeft(drawer);
         mainLayout.setCenter(contentArea);
 
-        // Create scene
         Scene scene = new Scene(mainLayout, 1000, 700);
         primaryStage.setTitle("Hệ thống quản lý cửa hàng sách");
         primaryStage.setScene(scene);
@@ -72,10 +64,6 @@ public class DashboardUI extends Application {
         productButton.setOnAction(e -> showProductsUI());
         staffButton.setOnAction(e -> showStaffUI());
         ordersButton.setOnAction(e -> showOrdersUI());
-
-        // Add a class-level SuppressWarnings annotation to handle the unused lambda
-        // parameter warnings
-        // @SuppressWarnings("unused")
     }
 
     private Button createNavButton(String text) {
@@ -154,8 +142,6 @@ public class DashboardUI extends Application {
         contentArea.getChildren().clear();
 
         try {
-            // Create the StorageUI content directly in the contentArea instead of opening a
-            // new window
             BorderPane storageContent = new BorderPane();
 
             // Add the StorageUI content to the main content area
@@ -286,7 +272,6 @@ public class DashboardUI extends Application {
             booksTable.getColumns().add(pageColumn);
             booksTable.getColumns().add(priceColumn);
 
-            // Add tables to layout
             VBox tablesSection = new VBox(20);
             tablesSection.setPadding(new Insets(10));
 
@@ -316,7 +301,6 @@ public class DashboardUI extends Application {
         contentArea.getChildren().clear();
 
         try {
-            // Create the StaffUI content directly in the contentArea
             BorderPane staffContent = new BorderPane();
 
             VBox topContent = new VBox();
@@ -342,7 +326,6 @@ public class DashboardUI extends Application {
             staffTable.getColumns().add(positionColumn);
             staffTable.getColumns().add(methodTypeColumn);
 
-            // User table (related to Staff)
             TableView<Object> userTable = new TableView<>();
             userTable.setPrefHeight(300);
 
@@ -358,7 +341,6 @@ public class DashboardUI extends Application {
             userTable.getColumns().add(phoneNumberColumn);
             userTable.getColumns().add(methodTypeUserColumn);
 
-            // Add tables to layout
             VBox tablesSection = new VBox(20);
             tablesSection.setPadding(new Insets(10));
 
@@ -384,7 +366,6 @@ public class DashboardUI extends Application {
         contentArea.getChildren().clear();
 
         try {
-            // Create the OrdersUI content directly in the contentArea
             BorderPane ordersContent = new BorderPane();
 
             VBox topContent = new VBox();
@@ -398,7 +379,6 @@ public class DashboardUI extends Application {
             topContent.setSpacing(10);
             topContent.setPadding(new Insets(10));
 
-            // Orders table
             TableView<Object> ordersTable = new TableView<>();
             ordersTable.setPrefHeight(200);
 
@@ -416,7 +396,6 @@ public class DashboardUI extends Application {
             ordersTable.getColumns().add(customerIdColumn);
             ordersTable.getColumns().add(methodTypeColumn);
 
-            // Customers table (related to Orders)
             TableView<Object> customersTable = new TableView<>();
             customersTable.setPrefHeight(150);
 
@@ -432,7 +411,6 @@ public class DashboardUI extends Application {
             customersTable.getColumns().add(spendingColumn);
             customersTable.getColumns().add(methodTypeCustomerColumn);
 
-            // Order Details table (related to Orders)
             TableView<Object> orderDetailsTable = new TableView<>();
             orderDetailsTable.setPrefHeight(150);
 
@@ -448,7 +426,6 @@ public class DashboardUI extends Application {
             orderDetailsTable.getColumns().add(quantityOrderDetailsColumn);
             orderDetailsTable.getColumns().add(methodTypeOrderDetailsColumn);
 
-            // Add tables to layout
             VBox tablesSection = new VBox(20);
             tablesSection.setPadding(new Insets(10));
 
