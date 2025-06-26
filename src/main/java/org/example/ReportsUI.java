@@ -63,7 +63,6 @@ public class ReportsUI extends Application {
         inventoryReportsTable.getColumns().add(valueColumn);
         inventoryReportsTable.getColumns().add(statusColumn);
 
-        // Add tables to layout
         VBox tablesSection = new VBox(20);
         tablesSection.setPadding(new Insets(10));
 

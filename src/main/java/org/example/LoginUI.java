@@ -28,47 +28,36 @@ public class LoginUI extends Application {
     }
 
     public void showLogin() {
-        // Create the main container
         VBox root = new VBox(20);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: white;");
 
-        // Title
         Text titleText = new Text("Welcome to Food Store Management");
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         titleText.setFill(Color.rgb(0, 102, 204));
 
-        // Create form
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-
-        // Username field
         Label userLabel = new Label("Username:");
         TextField userField = new TextField();
         userField.setPromptText("Enter your username");
         grid.add(userLabel, 0, 0);
         grid.add(userField, 1, 0);
-
-        // Password field
         Label passLabel = new Label("Password:");
         PasswordField passField = new PasswordField();
         passField.setPromptText("Enter your password");
         grid.add(passLabel, 0, 1);
         grid.add(passField, 1, 1);
-
-        // Login button
         Button loginButton = new Button("Login");
         loginButton.setStyle("-fx-background-color: #00994c; -fx-text-fill: white; -fx-font-weight: bold;");
         loginButton.setPrefWidth(200);
 
-        // Add components to root
         root.getChildren().addAll(titleText, grid, loginButton);
 
-        // Create scene
         Scene scene = new Scene(root, 400, 300);
         primaryStage.setTitle("Login");
         primaryStage.setScene(scene);
@@ -92,7 +81,6 @@ public class LoginUI extends Application {
 
             MongoCollection<Document> usersCollection = database.getCollection("users");
 
-            // DEBUG: Print all users in the collection
             System.out.println("--- All users in 'users' collection ---");
             for (Document doc : usersCollection.find()) {
                 System.out.println(doc.toJson());

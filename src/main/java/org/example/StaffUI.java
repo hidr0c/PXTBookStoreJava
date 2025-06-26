@@ -1,18 +1,32 @@
 package org.example;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class StaffUI extends Application {
+
+    // Sample data for demonstration
+    private ObservableList<Staff> staffData = FXCollections.observableArrayList(
+            new Staff("STF001", "Store Manager", "Full-time", "Active"),
+            new Staff("STF002", "Assistant Manager", "Full-time", "Active"),
+            new Staff("STF003", "Senior Bookseller", "Full-time", "Active"),
+            new Staff("STF004", "Junior Bookseller", "Part-time", "Active"),
+            new Staff("STF005", "Cashier", "Part-time", "On Leave"));
+
+    private ObservableList<User> userData = FXCollections.observableArrayList(
+            new User("USR001", "John Smith", "123 Main Street, Boston", "617-555-0123", "john.smith@email.com"),
+            new User("USR002", "Emily Johnson", "456 Oak Avenue, Cambridge", "617-555-0124", "emily.j@email.com"),
+            new User("USR003", "Michael Davis", "789 Pine Road, Somerville", "617-555-0125", "michael.d@email.com"),
+            new User("USR004", "Sarah Wilson", "101 Elm Street, Brookline", "617-555-0126", "sarah.w@email.com"),
+            new User("USR005", "David Thompson", "202 Maple Drive, Medford", "617-555-0127", "david.t@email.com"));
+
     @Override
     public void start(Stage primaryStage) {
         BorderPane root = new BorderPane();
@@ -20,80 +34,495 @@ public class StaffUI extends Application {
         // Main title and top section
         VBox topSection = new VBox(10);
         topSection.setPadding(new Insets(20));
-        topSection.setAlignment(javafx.geometry.Pos.CENTER);
+        topSection.setAlignment(Pos.CENTER);
 
         Label titleLabel = new Label("Staff Management");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
+        // Search and buttons section
+        HBox actionBar = new HBox(10);
+        actionBar.setAlignment(Pos.CENTER);
+
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search staff...");
+        searchField.setPrefWidth(300);
+
+        Button searchButton = new Button("Search");
+        searchButton.setStyle("-fx-background-color: #0066cc; -fx-text-fill: white;");
+
         Button createNewButton = new Button("Create New Staff");
         createNewButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px;");
-        createNewButton.setOnAction((ActionEvent e) -> showCreateNewStaffWindow());
+        createNewButton.setOnAction(event -> showCreateNewStaffWindow());
 
-        topSection.getChildren().addAll(titleLabel, createNewButton);
+        actionBar.getChildren().addAll(searchField, searchButton, createNewButton);
+
+        // Stats overview
+        HBox statsBar = new HBox(20);
+        statsBar.setPadding(new Insets(10));
+        statsBar.setAlignment(Pos.CENTER);
+
+        VBox totalStaffStats = createStatBox("Total Staff", "5");
+        VBox activeStaffStats = createStatBox("Active Staff", "4");
+        VBox fullTimeStats = createStatBox("Full Time", "3");
+        VBox partTimeStats = createStatBox("Part Time", "2");
+
+        statsBar.getChildren().addAll(totalStaffStats, activeStaffStats, fullTimeStats, partTimeStats);
+
+        topSection.getChildren().addAll(titleLabel, actionBar, statsBar);
         root.setTop(topSection);
 
-        // Staff table
-        TableView<Object> staffTable = new TableView<>();
-        staffTable.setPrefHeight(300);
+        // Add tables to a TabPane for better organization
+        TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        TableColumn<Object, String> staffIdColumn = new TableColumn<>("Staff ID");
-        TableColumn<Object, String> positionColumn = new TableColumn<>("Position");
-        TableColumn<Object, String> methodTypeColumn = new TableColumn<>("Method Type");
+        // Staff tab with table
+        Tab staffTab = new Tab("Staff");
+        VBox staffBox = new VBox(10);
+        staffBox.setPadding(new Insets(10));
 
-        staffTable.getColumns().addAll(staffIdColumn, positionColumn, methodTypeColumn);
-
-        // User table (related to Staff)
-        TableView<Object> userTable = new TableView<>();
-        userTable.setPrefHeight(300);
-
-        TableColumn<Object, String> userIdColumn = new TableColumn<>("User ID");
-        TableColumn<Object, String> fullNameColumn = new TableColumn<>("Full Name");
-        TableColumn<Object, String> addressColumn = new TableColumn<>("Address");
-        TableColumn<Object, String> phoneNumberColumn = new TableColumn<>("Phone Number");
-        TableColumn<Object, String> methodTypeUserColumn = new TableColumn<>("Method Type");
-
-        userTable.getColumns().addAll(userIdColumn, fullNameColumn, addressColumn, phoneNumberColumn,
-                methodTypeUserColumn);
-
-        // Add tables to layout
-        VBox tablesSection = new VBox(20);
-        tablesSection.setPadding(new Insets(10));
-
-        Label staffLabel = new Label("Staff Details:");
+        HBox staffHeader = new HBox(10);
+        Label staffLabel = new Label("Staff Records");
         staffLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        Button exportStaffBtn = new Button("Export Staff List");
+        exportStaffBtn.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white;");
 
-        Label userLabel = new Label("User Details:");
+        staffHeader.getChildren().addAll(staffLabel, new Pane(), exportStaffBtn);
+        HBox.setHgrow(new Pane(), Priority.ALWAYS);
+
+        // Staff table
+        TableView<Staff> staffTable = new TableView<>();
+        staffTable.setPrefHeight(250);
+        staffTable.setItems(staffData);
+
+        TableColumn<Staff, String> staffIdColumn = new TableColumn<>("Staff ID");
+        staffIdColumn.setCellValueFactory(cellData -> cellData.getValue().staffIdProperty());
+        staffIdColumn.setPrefWidth(100);
+
+        TableColumn<Staff, String> positionColumn = new TableColumn<>("Position");
+        positionColumn.setCellValueFactory(cellData -> cellData.getValue().positionProperty());
+        positionColumn.setPrefWidth(150);
+
+        TableColumn<Staff, String> employmentTypeColumn = new TableColumn<>("Employment Type");
+        employmentTypeColumn.setCellValueFactory(cellData -> cellData.getValue().employmentTypeProperty());
+        employmentTypeColumn.setPrefWidth(120);
+
+        TableColumn<Staff, String> statusColumn = new TableColumn<>("Status");
+        statusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
+        statusColumn.setPrefWidth(100);
+
+        TableColumn<Staff, Void> actionColumn = new TableColumn<>("Actions");
+        actionColumn.setPrefWidth(180);
+        actionColumn.setCellFactory(param -> new TableCell<Staff, Void>() {
+            private final Button editBtn = new Button("Edit");
+            private final Button deleteBtn = new Button("Delete");
+            private final Button statusBtn = new Button("Change Status");
+
+            {
+                editBtn.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
+                deleteBtn.setStyle("-fx-background-color: #dc3545; -fx-text-fill: white;");
+                statusBtn.setStyle("-fx-background-color: #ffc107; -fx-text-fill: black;");
+
+                editBtn.setOnAction(event -> {
+                    Staff data = getTableView().getItems().get(getIndex());
+                    // Edit functionality here
+                    System.out.println("Edit button clicked for: " + data.getStaffId());
+                });
+
+                deleteBtn.setOnAction(event -> {
+                    Staff data = getTableView().getItems().get(getIndex());
+                    // Delete functionality here
+                    System.out.println("Delete button clicked for: " + data.getStaffId());
+                });
+
+                statusBtn.setOnAction(event -> {
+                    Staff data = getTableView().getItems().get(getIndex());
+                    // Status change functionality
+                    System.out.println("Status button clicked for: " + data.getStaffId());
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    HBox pane = new HBox(5);
+                    pane.setAlignment(Pos.CENTER);
+                    pane.getChildren().addAll(editBtn, deleteBtn, statusBtn);
+                    setGraphic(pane);
+                }
+            }
+        });
+
+        staffTable.getColumns().addAll(staffIdColumn, positionColumn, employmentTypeColumn, statusColumn, actionColumn);
+
+        staffBox.getChildren().addAll(staffHeader, staffTable);
+        staffTab.setContent(staffBox);
+
+        // User tab with table
+        Tab userTab = new Tab("User Details");
+        VBox userBox = new VBox(10);
+        userBox.setPadding(new Insets(10));
+
+        Label userLabel = new Label("User Records");
         userLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-        tablesSection.getChildren().addAll(
-                staffLabel, staffTable,
-                userLabel, userTable);
+        // User table
+        TableView<User> userTable = new TableView<>();
+        userTable.setPrefHeight(250);
+        userTable.setItems(userData);
 
-        root.setCenter(tablesSection);
+        TableColumn<User, String> userIdColumn = new TableColumn<>("User ID");
+        userIdColumn.setCellValueFactory(cellData -> cellData.getValue().userIdProperty());
+        userIdColumn.setPrefWidth(80);
 
-        Scene scene = new Scene(root, 800, 600);
-        primaryStage.setTitle("Staff Management");
+        TableColumn<User, String> fullNameColumn = new TableColumn<>("Full Name");
+        fullNameColumn.setCellValueFactory(cellData -> cellData.getValue().fullNameProperty());
+        fullNameColumn.setPrefWidth(150);
+
+        TableColumn<User, String> addressColumn = new TableColumn<>("Address");
+        addressColumn.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
+        addressColumn.setPrefWidth(200);
+
+        TableColumn<User, String> phoneNumberColumn = new TableColumn<>("Phone Number");
+        phoneNumberColumn.setCellValueFactory(cellData -> cellData.getValue().phoneNumberProperty());
+        phoneNumberColumn.setPrefWidth(120);
+
+        TableColumn<User, String> emailColumn = new TableColumn<>("Email");
+        emailColumn.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
+        emailColumn.setPrefWidth(180);
+
+        TableColumn<User, Void> userActionColumn = new TableColumn<>("Actions");
+        userActionColumn.setPrefWidth(120);
+        userActionColumn.setCellFactory(param -> new TableCell<User, Void>() {
+            private final Button editBtn = new Button("Edit");
+            private final Button deleteBtn = new Button("Delete");
+
+            {
+                editBtn.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
+                deleteBtn.setStyle("-fx-background-color: #dc3545; -fx-text-fill: white;");
+
+                editBtn.setOnAction(event -> {
+                    User data = getTableView().getItems().get(getIndex());
+                    // Edit functionality here
+                    System.out.println("Edit button clicked for: " + data.getFullName());
+                });
+
+                deleteBtn.setOnAction(event -> {
+                    User data = getTableView().getItems().get(getIndex());
+                    // Delete functionality here
+                    System.out.println("Delete button clicked for: " + data.getFullName());
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    HBox pane = new HBox(5);
+                    pane.setAlignment(Pos.CENTER);
+                    pane.getChildren().addAll(editBtn, deleteBtn);
+                    setGraphic(pane);
+                }
+            }
+        });
+
+        userTable.getColumns().addAll(userIdColumn, fullNameColumn, addressColumn, phoneNumberColumn, emailColumn,
+                userActionColumn);
+
+        userBox.getChildren().addAll(userLabel, userTable);
+        userTab.setContent(userBox);
+
+        // Attendance tab
+        Tab attendanceTab = new Tab("Attendance");
+        VBox attendanceBox = createPlaceholderContent("Attendance records will be displayed here");
+        attendanceTab.setContent(attendanceBox);
+
+        // Performance tab
+        Tab performanceTab = new Tab("Performance");
+        VBox performanceBox = createPlaceholderContent("Staff performance metrics will be displayed here");
+        performanceTab.setContent(performanceBox);
+
+        tabPane.getTabs().addAll(staffTab, userTab, attendanceTab, performanceTab);
+        root.setCenter(tabPane);
+
+        // Status bar at the bottom
+        HBox statusBar = new HBox(10);
+        statusBar.setPadding(new Insets(5, 10, 5, 10));
+        statusBar.setStyle("-fx-background-color: #f8f9fa;");
+        Label statusLabel = new Label("Ready");
+        statusBar.getChildren().add(statusLabel);
+        root.setBottom(statusBar);
+
+        Scene scene = new Scene(root, 900, 700);
+        primaryStage.setTitle("Book Store Management - Staff");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
+    private VBox createPlaceholderContent(String message) {
+        VBox box = new VBox(10);
+        box.setPadding(new Insets(20));
+        box.setAlignment(Pos.CENTER);
+
+        Label placeholderLabel = new Label(message);
+        placeholderLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #999999;");
+
+        box.getChildren().add(placeholderLabel);
+        return box;
+    }
+
+    private VBox createStatBox(String title, String value) {
+        VBox box = new VBox(5);
+        box.setPadding(new Insets(10));
+        box.setAlignment(Pos.CENTER);
+        box.setStyle(
+                "-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5;");
+        box.setPrefWidth(150);
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666666;");
+
+        Label valueLabel = new Label(value);
+        valueLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        box.getChildren().addAll(titleLabel, valueLabel);
+        return box;
+    }
+
     private void showCreateNewStaffWindow() {
         Stage newWindow = new Stage();
-        VBox newContent = new VBox(10);
-        newContent.setPadding(new Insets(20));
-        newContent.setAlignment(javafx.geometry.Pos.CENTER);
 
-        Label newWindowText = new Label("Create New Staff");
-        newWindowText.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        newContent.getChildren().add(newWindowText);
+        TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        Scene newScene = new Scene(newContent, 400, 300);
-        newWindow.setTitle("Create New Staff");
+        // Staff Tab
+        Tab staffTab = new Tab("New Staff");
+        VBox staffForm = new VBox(10);
+        staffForm.setPadding(new Insets(20));
+
+        Label staffTitle = new Label("Add New Staff");
+        staffTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+        GridPane staffGrid = new GridPane();
+        staffGrid.setHgap(10);
+        staffGrid.setVgap(10);
+        staffGrid.setPadding(new Insets(10));
+
+        staffGrid.add(new Label("Staff ID:"), 0, 0);
+        TextField staffIdField = new TextField();
+        staffIdField.setPromptText("Auto-generated");
+        staffIdField.setDisable(true);
+        staffGrid.add(staffIdField, 1, 0);
+
+        staffGrid.add(new Label("Position:"), 0, 1);
+        TextField positionField = new TextField();
+        staffGrid.add(positionField, 1, 1);
+
+        staffGrid.add(new Label("Employment Type:"), 0, 2);
+        ComboBox<String> employmentTypeCombo = new ComboBox<>();
+        employmentTypeCombo.getItems().addAll("Full-time", "Part-time", "Contract", "Seasonal");
+        employmentTypeCombo.setValue("Full-time");
+        staffGrid.add(employmentTypeCombo, 1, 2);
+
+        staffGrid.add(new Label("Status:"), 0, 3);
+        ComboBox<String> statusCombo = new ComboBox<>();
+        statusCombo.getItems().addAll("Active", "On Leave", "Terminated");
+        statusCombo.setValue("Active");
+        staffGrid.add(statusCombo, 1, 3);
+
+        staffGrid.add(new Label("User:"), 0, 4);
+        ComboBox<String> userCombo = new ComboBox<>();
+        userCombo.getItems().addAll("John Smith", "Emily Johnson", "Michael Davis", "Sarah Wilson", "David Thompson");
+        staffGrid.add(userCombo, 1, 4);
+
+        HBox staffButtons = new HBox(10);
+        Button saveStaffButton = new Button("Save Staff");
+        saveStaffButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;");
+        Button cancelStaffButton = new Button("Cancel");
+        staffButtons.getChildren().addAll(saveStaffButton, cancelStaffButton);
+        staffButtons.setAlignment(Pos.CENTER_RIGHT);
+
+        staffForm.getChildren().addAll(staffTitle, staffGrid, staffButtons);
+        staffTab.setContent(staffForm);
+
+        // User Tab
+        Tab userTab = new Tab("New User");
+        VBox userForm = new VBox(10);
+        userForm.setPadding(new Insets(20));
+
+        Label userTitle = new Label("Add New User");
+        userTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+        GridPane userGrid = new GridPane();
+        userGrid.setHgap(10);
+        userGrid.setVgap(10);
+        userGrid.setPadding(new Insets(10));
+
+        userGrid.add(new Label("User ID:"), 0, 0);
+        TextField userIdField = new TextField();
+        userIdField.setPromptText("Auto-generated");
+        userIdField.setDisable(true);
+        userGrid.add(userIdField, 1, 0);
+
+        userGrid.add(new Label("Full Name:"), 0, 1);
+        TextField fullNameField = new TextField();
+        userGrid.add(fullNameField, 1, 1);
+
+        userGrid.add(new Label("Address:"), 0, 2);
+        TextField addressField = new TextField();
+        userGrid.add(addressField, 1, 2);
+
+        userGrid.add(new Label("Phone Number:"), 0, 3);
+        TextField phoneField = new TextField();
+        userGrid.add(phoneField, 1, 3);
+
+        userGrid.add(new Label("Email:"), 0, 4);
+        TextField emailField = new TextField();
+        userGrid.add(emailField, 1, 4);
+
+        HBox userButtons = new HBox(10);
+        Button saveUserButton = new Button("Save User");
+        saveUserButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;");
+        Button cancelUserButton = new Button("Cancel");
+        userButtons.getChildren().addAll(saveUserButton, cancelUserButton);
+        userButtons.setAlignment(Pos.CENTER_RIGHT);
+
+        userForm.getChildren().addAll(userTitle, userGrid, userButtons);
+        userTab.setContent(userForm);
+
+        tabPane.getTabs().addAll(staffTab, userTab);
+
+        Scene newScene = new Scene(tabPane, 500, 500);
+        newWindow.setTitle("Add New Staff");
         newWindow.setScene(newScene);
         newWindow.show();
+
+        // Action handlers
+        cancelStaffButton.setOnAction(e -> newWindow.close());
+        cancelUserButton.setOnAction(e -> newWindow.close());
+
+        saveStaffButton.setOnAction(e -> {
+            // Save staff logic here
+            System.out.println(
+                    "Saving new staff: " + positionField.getText() + " (" + employmentTypeCombo.getValue() + ")");
+            newWindow.close();
+        });
+
+        saveUserButton.setOnAction(e -> {
+            // Save user logic here
+            System.out.println("Saving new user: " + fullNameField.getText());
+            newWindow.close();
+        });
     }
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    // Model classes
+    public static class Staff {
+        private javafx.beans.property.SimpleStringProperty staffId;
+        private javafx.beans.property.SimpleStringProperty position;
+        private javafx.beans.property.SimpleStringProperty employmentType;
+        private javafx.beans.property.SimpleStringProperty status;
+
+        public Staff(String id, String position, String employmentType, String status) {
+            this.staffId = new javafx.beans.property.SimpleStringProperty(id);
+            this.position = new javafx.beans.property.SimpleStringProperty(position);
+            this.employmentType = new javafx.beans.property.SimpleStringProperty(employmentType);
+            this.status = new javafx.beans.property.SimpleStringProperty(status);
+        }
+
+        public String getStaffId() {
+            return staffId.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty staffIdProperty() {
+            return staffId;
+        }
+
+        public String getPosition() {
+            return position.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty positionProperty() {
+            return position;
+        }
+
+        public String getEmploymentType() {
+            return employmentType.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty employmentTypeProperty() {
+            return employmentType;
+        }
+
+        public String getStatus() {
+            return status.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty statusProperty() {
+            return status;
+        }
+    }
+
+    public static class User {
+        private javafx.beans.property.SimpleStringProperty userId;
+        private javafx.beans.property.SimpleStringProperty fullName;
+        private javafx.beans.property.SimpleStringProperty address;
+        private javafx.beans.property.SimpleStringProperty phoneNumber;
+        private javafx.beans.property.SimpleStringProperty email;
+
+        public User(String id, String name, String address, String phone, String email) {
+            this.userId = new javafx.beans.property.SimpleStringProperty(id);
+            this.fullName = new javafx.beans.property.SimpleStringProperty(name);
+            this.address = new javafx.beans.property.SimpleStringProperty(address);
+            this.phoneNumber = new javafx.beans.property.SimpleStringProperty(phone);
+            this.email = new javafx.beans.property.SimpleStringProperty(email);
+        }
+
+        public String getUserId() {
+            return userId.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty userIdProperty() {
+            return userId;
+        }
+
+        public String getFullName() {
+            return fullName.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty fullNameProperty() {
+            return fullName;
+        }
+
+        public String getAddress() {
+            return address.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty addressProperty() {
+            return address;
+        }
+
+        public String getPhoneNumber() {
+            return phoneNumber.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty phoneNumberProperty() {
+            return phoneNumber;
+        }
+
+        public String getEmail() {
+            return email.get();
+        }
+
+        public javafx.beans.property.SimpleStringProperty emailProperty() {
+            return email;
+        }
     }
 }
