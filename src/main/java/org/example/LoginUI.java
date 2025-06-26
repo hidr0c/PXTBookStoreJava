@@ -33,7 +33,7 @@ public class LoginUI extends Application {
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: white;");
 
-        Text titleText = new Text("Welcome to Food Store Management");
+        Text titleText = new Text("App quản lý cửa hàng bán sách");
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         titleText.setFill(Color.rgb(0, 102, 204));
 
@@ -42,14 +42,14 @@ public class LoginUI extends Application {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        Label userLabel = new Label("Username:");
+        Label userLabel = new Label("Email:");
         TextField userField = new TextField();
-        userField.setPromptText("Enter your username");
+        userField.setPromptText("Nhập email");
         grid.add(userLabel, 0, 0);
         grid.add(userField, 1, 0);
-        Label passLabel = new Label("Password:");
+        Label passLabel = new Label("Mật khẩu:");
         PasswordField passField = new PasswordField();
-        passField.setPromptText("Enter your password");
+        passField.setPromptText("Nhập mật khẩu");
         grid.add(passLabel, 0, 1);
         grid.add(passField, 1, 1);
         Button loginButton = new Button("Login");

@@ -36,7 +36,7 @@ public class StaffUI extends Application {
         topSection.setPadding(new Insets(20));
         topSection.setAlignment(Pos.CENTER);
 
-        Label titleLabel = new Label("Staff Management");
+        Label titleLabel = new Label("Quản lý nhân viên");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
         // Search and buttons section
@@ -44,13 +44,12 @@ public class StaffUI extends Application {
         actionBar.setAlignment(Pos.CENTER);
 
         TextField searchField = new TextField();
-        searchField.setPromptText("Search staff...");
+        searchField.setPromptText("Tìm kiếm nhân viên...");
         searchField.setPrefWidth(300);
 
-        Button searchButton = new Button("Search");
+        Button searchButton = new Button("Tìm kiếm");
         searchButton.setStyle("-fx-background-color: #0066cc; -fx-text-fill: white;");
-
-        Button createNewButton = new Button("Create New Staff");
+        Button createNewButton = new Button("Thêm nhân viên mới");
         createNewButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px;");
         createNewButton.setOnAction(event -> showCreateNewStaffWindow());
 
@@ -61,29 +60,26 @@ public class StaffUI extends Application {
         statsBar.setPadding(new Insets(10));
         statsBar.setAlignment(Pos.CENTER);
 
-        VBox totalStaffStats = createStatBox("Total Staff", "5");
-        VBox activeStaffStats = createStatBox("Active Staff", "4");
-        VBox fullTimeStats = createStatBox("Full Time", "3");
-        VBox partTimeStats = createStatBox("Part Time", "2");
+        VBox totalStaffStats = createStatBox("Tổng nhân viên", "5");
+        VBox activeStaffStats = createStatBox("Đang làm việc", "4");
+        VBox fullTimeStats = createStatBox("Toàn thời gian", "3");
+        VBox partTimeStats = createStatBox("Bán thời gian", "2");
 
         statsBar.getChildren().addAll(totalStaffStats, activeStaffStats, fullTimeStats, partTimeStats);
 
         topSection.getChildren().addAll(titleLabel, actionBar, statsBar);
         root.setTop(topSection);
 
-        // Add tables to a TabPane for better organization
         TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        // Staff tab with table
-        Tab staffTab = new Tab("Staff");
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE); // Staff tab with table
+        Tab staffTab = new Tab("Nhân viên");
         VBox staffBox = new VBox(10);
         staffBox.setPadding(new Insets(10));
 
         HBox staffHeader = new HBox(10);
-        Label staffLabel = new Label("Staff Records");
+        Label staffLabel = new Label("Danh sách nhân viên");
         staffLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        Button exportStaffBtn = new Button("Export Staff List");
+        Button exportStaffBtn = new Button("Xuất danh sách");
         exportStaffBtn.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white;");
 
         staffHeader.getChildren().addAll(staffLabel, new Pane(), exportStaffBtn);
@@ -94,11 +90,11 @@ public class StaffUI extends Application {
         staffTable.setPrefHeight(250);
         staffTable.setItems(staffData);
 
-        TableColumn<Staff, String> staffIdColumn = new TableColumn<>("Staff ID");
+        TableColumn<Staff, String> staffIdColumn = new TableColumn<>("Mã nhân viên");
         staffIdColumn.setCellValueFactory(cellData -> cellData.getValue().staffIdProperty());
         staffIdColumn.setPrefWidth(100);
 
-        TableColumn<Staff, String> positionColumn = new TableColumn<>("Position");
+        TableColumn<Staff, String> positionColumn = new TableColumn<>("Chức vụ");
         positionColumn.setCellValueFactory(cellData -> cellData.getValue().positionProperty());
         positionColumn.setPrefWidth(150);
 
@@ -106,16 +102,16 @@ public class StaffUI extends Application {
         employmentTypeColumn.setCellValueFactory(cellData -> cellData.getValue().employmentTypeProperty());
         employmentTypeColumn.setPrefWidth(120);
 
-        TableColumn<Staff, String> statusColumn = new TableColumn<>("Status");
+        TableColumn<Staff, String> statusColumn = new TableColumn<>("Trạng thái");
         statusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
         statusColumn.setPrefWidth(100);
 
-        TableColumn<Staff, Void> actionColumn = new TableColumn<>("Actions");
+        TableColumn<Staff, Void> actionColumn = new TableColumn<>("Thao tác");
         actionColumn.setPrefWidth(180);
         actionColumn.setCellFactory(param -> new TableCell<Staff, Void>() {
-            private final Button editBtn = new Button("Edit");
-            private final Button deleteBtn = new Button("Delete");
-            private final Button statusBtn = new Button("Change Status");
+            private final Button editBtn = new Button("Sửa");
+            private final Button deleteBtn = new Button("Xóa");
+            private final Button statusBtn = new Button("Đổi trạng thái");
 
             {
                 editBtn.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
@@ -153,19 +149,21 @@ public class StaffUI extends Application {
                     setGraphic(pane);
                 }
             }
-        });
-
-        staffTable.getColumns().addAll(staffIdColumn, positionColumn, employmentTypeColumn, statusColumn, actionColumn);
+        }); // Thêm từng cột riêng lẻ để tránh cảnh báo type safety
+        staffTable.getColumns().add(staffIdColumn);
+        staffTable.getColumns().add(positionColumn);
+        staffTable.getColumns().add(employmentTypeColumn);
+        staffTable.getColumns().add(statusColumn);
+        staffTable.getColumns().add(actionColumn);
 
         staffBox.getChildren().addAll(staffHeader, staffTable);
         staffTab.setContent(staffBox);
 
         // User tab with table
-        Tab userTab = new Tab("User Details");
+        Tab userTab = new Tab("Thông tin người dùng");
         VBox userBox = new VBox(10);
         userBox.setPadding(new Insets(10));
-
-        Label userLabel = new Label("User Records");
+        Label userLabel = new Label("Danh sách người dùng");
         userLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         // User table
@@ -173,19 +171,19 @@ public class StaffUI extends Application {
         userTable.setPrefHeight(250);
         userTable.setItems(userData);
 
-        TableColumn<User, String> userIdColumn = new TableColumn<>("User ID");
+        TableColumn<User, String> userIdColumn = new TableColumn<>("ID");
         userIdColumn.setCellValueFactory(cellData -> cellData.getValue().userIdProperty());
         userIdColumn.setPrefWidth(80);
 
-        TableColumn<User, String> fullNameColumn = new TableColumn<>("Full Name");
+        TableColumn<User, String> fullNameColumn = new TableColumn<>("Họ và tên");
         fullNameColumn.setCellValueFactory(cellData -> cellData.getValue().fullNameProperty());
         fullNameColumn.setPrefWidth(150);
 
-        TableColumn<User, String> addressColumn = new TableColumn<>("Address");
+        TableColumn<User, String> addressColumn = new TableColumn<>("Địa chỉ");
         addressColumn.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
         addressColumn.setPrefWidth(200);
 
-        TableColumn<User, String> phoneNumberColumn = new TableColumn<>("Phone Number");
+        TableColumn<User, String> phoneNumberColumn = new TableColumn<>("Số điện thoại");
         phoneNumberColumn.setCellValueFactory(cellData -> cellData.getValue().phoneNumberProperty());
         phoneNumberColumn.setPrefWidth(120);
 
@@ -193,11 +191,11 @@ public class StaffUI extends Application {
         emailColumn.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
         emailColumn.setPrefWidth(180);
 
-        TableColumn<User, Void> userActionColumn = new TableColumn<>("Actions");
+        TableColumn<User, Void> userActionColumn = new TableColumn<>("Thao tác");
         userActionColumn.setPrefWidth(120);
         userActionColumn.setCellFactory(param -> new TableCell<User, Void>() {
-            private final Button editBtn = new Button("Edit");
-            private final Button deleteBtn = new Button("Delete");
+            private final Button editBtn = new Button("Sửa");
+            private final Button deleteBtn = new Button("Xóa");
 
             {
                 editBtn.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
@@ -228,37 +226,42 @@ public class StaffUI extends Application {
                     setGraphic(pane);
                 }
             }
-        });
-
-        userTable.getColumns().addAll(userIdColumn, fullNameColumn, addressColumn, phoneNumberColumn, emailColumn,
-                userActionColumn);
+        }); // Thêm từng cột riêng lẻ để tránh cảnh báo type safety
+        userTable.getColumns().add(userIdColumn);
+        userTable.getColumns().add(fullNameColumn);
+        userTable.getColumns().add(addressColumn);
+        userTable.getColumns().add(phoneNumberColumn);
+        userTable.getColumns().add(emailColumn);
+        userTable.getColumns().add(userActionColumn);
 
         userBox.getChildren().addAll(userLabel, userTable);
         userTab.setContent(userBox);
 
         // Attendance tab
-        Tab attendanceTab = new Tab("Attendance");
-        VBox attendanceBox = createPlaceholderContent("Attendance records will be displayed here");
+        Tab attendanceTab = new Tab("Chuyên cần");
+        VBox attendanceBox = createPlaceholderContent("Dữ liệu chấm công sẽ được hiển thị ở đây");
         attendanceTab.setContent(attendanceBox);
 
         // Performance tab
-        Tab performanceTab = new Tab("Performance");
-        VBox performanceBox = createPlaceholderContent("Staff performance metrics will be displayed here");
+        Tab performanceTab = new Tab("Hiệu suất");
+        VBox performanceBox = createPlaceholderContent("Thông số hiệu suất nhân viên sẽ được hiển thị ở đây");
         performanceTab.setContent(performanceBox);
 
-        tabPane.getTabs().addAll(staffTab, userTab, attendanceTab, performanceTab);
-        root.setCenter(tabPane);
-
-        // Status bar at the bottom
+        // Thêm từng tab riêng lẻ để tránh cảnh báo type safety
+        tabPane.getTabs().add(staffTab);
+        tabPane.getTabs().add(userTab);
+        tabPane.getTabs().add(attendanceTab);
+        tabPane.getTabs().add(performanceTab);
+        root.setCenter(tabPane); // Status bar at the bottom
         HBox statusBar = new HBox(10);
         statusBar.setPadding(new Insets(5, 10, 5, 10));
         statusBar.setStyle("-fx-background-color: #f8f9fa;");
-        Label statusLabel = new Label("Ready");
+        Label statusLabel = new Label("Sẵn sàng");
         statusBar.getChildren().add(statusLabel);
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 900, 700);
-        primaryStage.setTitle("Book Store Management - Staff");
+        primaryStage.setTitle("Quản lý hiệu sách - Nhân viên");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -297,14 +300,12 @@ public class StaffUI extends Application {
         Stage newWindow = new Stage();
 
         TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        // Staff Tab
-        Tab staffTab = new Tab("New Staff");
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE); // Staff Tab
+        Tab staffTab = new Tab("Nhân viên mới");
         VBox staffForm = new VBox(10);
         staffForm.setPadding(new Insets(20));
 
-        Label staffTitle = new Label("Add New Staff");
+        Label staffTitle = new Label("Thêm nhân viên mới");
         staffTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         GridPane staffGrid = new GridPane();
@@ -312,49 +313,48 @@ public class StaffUI extends Application {
         staffGrid.setVgap(10);
         staffGrid.setPadding(new Insets(10));
 
-        staffGrid.add(new Label("Staff ID:"), 0, 0);
+        staffGrid.add(new Label("Mã nhân viên:"), 0, 0);
         TextField staffIdField = new TextField();
-        staffIdField.setPromptText("Auto-generated");
+        staffIdField.setPromptText("Tự động tạo");
         staffIdField.setDisable(true);
         staffGrid.add(staffIdField, 1, 0);
 
-        staffGrid.add(new Label("Position:"), 0, 1);
+        staffGrid.add(new Label("Chức vụ:"), 0, 1);
         TextField positionField = new TextField();
         staffGrid.add(positionField, 1, 1);
 
-        staffGrid.add(new Label("Employment Type:"), 0, 2);
+        staffGrid.add(new Label("Loại hợp đồng:"), 0, 2);
         ComboBox<String> employmentTypeCombo = new ComboBox<>();
-        employmentTypeCombo.getItems().addAll("Full-time", "Part-time", "Contract", "Seasonal");
-        employmentTypeCombo.setValue("Full-time");
+        employmentTypeCombo.getItems().addAll("Toàn thời gian", "Bán thời gian", "Hợp đồng", "Thời vụ");
+        employmentTypeCombo.setValue("Toàn thời gian");
         staffGrid.add(employmentTypeCombo, 1, 2);
 
-        staffGrid.add(new Label("Status:"), 0, 3);
+        staffGrid.add(new Label("Trạng thái:"), 0, 3);
         ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Active", "On Leave", "Terminated");
-        statusCombo.setValue("Active");
+        statusCombo.getItems().addAll("Đang làm việc", "Nghỉ phép", "Đã nghỉ việc");
+        statusCombo.setValue("Đang làm việc");
         staffGrid.add(statusCombo, 1, 3);
 
-        staffGrid.add(new Label("User:"), 0, 4);
+        staffGrid.add(new Label("Người dùng:"), 0, 4);
         ComboBox<String> userCombo = new ComboBox<>();
         userCombo.getItems().addAll("John Smith", "Emily Johnson", "Michael Davis", "Sarah Wilson", "David Thompson");
         staffGrid.add(userCombo, 1, 4);
 
         HBox staffButtons = new HBox(10);
-        Button saveStaffButton = new Button("Save Staff");
+        Button saveStaffButton = new Button("Lưu nhân viên");
         saveStaffButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;");
-        Button cancelStaffButton = new Button("Cancel");
+        Button cancelStaffButton = new Button("Hủy");
         staffButtons.getChildren().addAll(saveStaffButton, cancelStaffButton);
         staffButtons.setAlignment(Pos.CENTER_RIGHT);
-
         staffForm.getChildren().addAll(staffTitle, staffGrid, staffButtons);
         staffTab.setContent(staffForm);
 
         // User Tab
-        Tab userTab = new Tab("New User");
+        Tab userTab = new Tab("Người dùng mới");
         VBox userForm = new VBox(10);
         userForm.setPadding(new Insets(20));
 
-        Label userTitle = new Label("Add New User");
+        Label userTitle = new Label("Thêm người dùng mới");
         userTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         GridPane userGrid = new GridPane();
@@ -362,21 +362,21 @@ public class StaffUI extends Application {
         userGrid.setVgap(10);
         userGrid.setPadding(new Insets(10));
 
-        userGrid.add(new Label("User ID:"), 0, 0);
+        userGrid.add(new Label("ID người dùng:"), 0, 0);
         TextField userIdField = new TextField();
-        userIdField.setPromptText("Auto-generated");
+        userIdField.setPromptText("Tự động tạo");
         userIdField.setDisable(true);
         userGrid.add(userIdField, 1, 0);
 
-        userGrid.add(new Label("Full Name:"), 0, 1);
+        userGrid.add(new Label("Họ và tên:"), 0, 1);
         TextField fullNameField = new TextField();
         userGrid.add(fullNameField, 1, 1);
 
-        userGrid.add(new Label("Address:"), 0, 2);
+        userGrid.add(new Label("Địa chỉ:"), 0, 2);
         TextField addressField = new TextField();
         userGrid.add(addressField, 1, 2);
 
-        userGrid.add(new Label("Phone Number:"), 0, 3);
+        userGrid.add(new Label("Số điện thoại:"), 0, 3);
         TextField phoneField = new TextField();
         userGrid.add(phoneField, 1, 3);
 
@@ -385,36 +385,35 @@ public class StaffUI extends Application {
         userGrid.add(emailField, 1, 4);
 
         HBox userButtons = new HBox(10);
-        Button saveUserButton = new Button("Save User");
+        Button saveUserButton = new Button("Lưu người dùng");
         saveUserButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;");
-        Button cancelUserButton = new Button("Cancel");
+        Button cancelUserButton = new Button("Hủy");
         userButtons.getChildren().addAll(saveUserButton, cancelUserButton);
         userButtons.setAlignment(Pos.CENTER_RIGHT);
-
         userForm.getChildren().addAll(userTitle, userGrid, userButtons);
         userTab.setContent(userForm);
 
-        tabPane.getTabs().addAll(staffTab, userTab);
+        // Thêm từng tab riêng lẻ để tránh cảnh báo type safety
+        tabPane.getTabs().add(staffTab);
+        tabPane.getTabs().add(userTab);
 
         Scene newScene = new Scene(tabPane, 500, 500);
-        newWindow.setTitle("Add New Staff");
+        newWindow.setTitle("Thêm nhân viên mới");
         newWindow.setScene(newScene);
-        newWindow.show();
-
-        // Action handlers
+        newWindow.show(); // Action handlers
         cancelStaffButton.setOnAction(e -> newWindow.close());
         cancelUserButton.setOnAction(e -> newWindow.close());
 
         saveStaffButton.setOnAction(e -> {
             // Save staff logic here
             System.out.println(
-                    "Saving new staff: " + positionField.getText() + " (" + employmentTypeCombo.getValue() + ")");
+                    "Đang lưu nhân viên mới: " + positionField.getText() + " (" + employmentTypeCombo.getValue() + ")");
             newWindow.close();
         });
 
         saveUserButton.setOnAction(e -> {
             // Save user logic here
-            System.out.println("Saving new user: " + fullNameField.getText());
+            System.out.println("Đang lưu người dùng mới: " + fullNameField.getText());
             newWindow.close();
         });
     }

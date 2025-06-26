@@ -47,14 +47,12 @@ public class OrdersUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        BorderPane root = new BorderPane();
-
-        // Main title and top section
+        BorderPane root = new BorderPane(); // Main title and top section
         VBox topSection = new VBox(10);
         topSection.setPadding(new Insets(20));
         topSection.setAlignment(Pos.CENTER);
 
-        Label titleLabel = new Label("Order Management");
+        Label titleLabel = new Label("Quản lý đơn hàng");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
         // Search and buttons section
@@ -62,27 +60,25 @@ public class OrdersUI extends Application {
         actionBar.setAlignment(Pos.CENTER);
 
         TextField searchField = new TextField();
-        searchField.setPromptText("Search orders by ID or customer...");
+        searchField.setPromptText("Tìm kiếm đơn hàng theo ID hoặc khách hàng...");
         searchField.setPrefWidth(300);
 
-        Button searchButton = new Button("Search");
+        Button searchButton = new Button("Tìm kiếm");
         searchButton.setStyle("-fx-background-color: #0066cc; -fx-text-fill: white;");
 
-        Button createNewButton = new Button("Create New Order");
+        Button createNewButton = new Button("Tạo đơn hàng mới");
         createNewButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px;");
         createNewButton.setOnAction(event -> showCreateNewOrderWindow());
 
-        actionBar.getChildren().addAll(searchField, searchButton, createNewButton);
-
-        // Order statistics section
+        actionBar.getChildren().addAll(searchField, searchButton, createNewButton); // Order statistics section
         HBox statsBar = new HBox(20);
         statsBar.setPadding(new Insets(10));
         statsBar.setAlignment(Pos.CENTER);
 
-        VBox totalOrdersStats = createStatBox("Total Orders", "124");
-        VBox pendingOrdersStats = createStatBox("Pending Orders", "37");
-        VBox completedOrdersStats = createStatBox("Completed", "82");
-        VBox todayOrdersStats = createStatBox("Today's Orders", "5");
+        VBox totalOrdersStats = createStatBox("Tổng đơn hàng", "124");
+        VBox pendingOrdersStats = createStatBox("Đơn hàng đang xử lý", "37");
+        VBox completedOrdersStats = createStatBox("Hoàn thành", "82");
+        VBox todayOrdersStats = createStatBox("Đơn hàng hôm nay", "5");
 
         statsBar.getChildren().addAll(totalOrdersStats, pendingOrdersStats, completedOrdersStats, todayOrdersStats);
 
@@ -91,13 +87,13 @@ public class OrdersUI extends Application {
         dateRangeBar.setAlignment(Pos.CENTER);
         dateRangeBar.setPadding(new Insets(5));
 
-        Label fromLabel = new Label("From:");
+        Label fromLabel = new Label("Từ ngày:");
         DatePicker fromDatePicker = new DatePicker(LocalDate.now().minusDays(30));
 
-        Label toLabel = new Label("To:");
+        Label toLabel = new Label("Đến ngày:");
         DatePicker toDatePicker = new DatePicker(LocalDate.now());
 
-        Button applyFilterButton = new Button("Apply Filter");
+        Button applyFilterButton = new Button("Lọc dữ liệu");
         applyFilterButton.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white;");
 
         dateRangeBar.getChildren().addAll(fromLabel, fromDatePicker, toLabel, toDatePicker, applyFilterButton);
@@ -107,10 +103,8 @@ public class OrdersUI extends Application {
 
         // Main content with TabPane
         TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        // Orders tab
-        Tab ordersTab = new Tab("Orders");
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE); // Orders tab
+        Tab ordersTab = new Tab("Đơn hàng");
         VBox ordersBox = new VBox(10);
         ordersBox.setPadding(new Insets(10));
 
@@ -122,15 +116,15 @@ public class OrdersUI extends Application {
         ordersTable.setPrefHeight(250);
         ordersTable.setItems(orderData);
 
-        TableColumn<Order, String> orderIdColumn = new TableColumn<>("Order ID");
+        TableColumn<Order, String> orderIdColumn = new TableColumn<>("Mã đơn hàng");
         orderIdColumn.setCellValueFactory(cellData -> cellData.getValue().orderIdProperty());
-        orderIdColumn.setPrefWidth(80);
+        orderIdColumn.setPrefWidth(100);
 
-        TableColumn<Order, String> orderDateColumn = new TableColumn<>("Order Date");
+        TableColumn<Order, String> orderDateColumn = new TableColumn<>("Ngày đặt hàng");
         orderDateColumn.setCellValueFactory(cellData -> cellData.getValue().orderDateProperty());
-        orderDateColumn.setPrefWidth(100);
+        orderDateColumn.setPrefWidth(120);
 
-        TableColumn<Order, Number> totalAmountColumn = new TableColumn<>("Total Amount");
+        TableColumn<Order, Number> totalAmountColumn = new TableColumn<>("Tổng tiền");
         totalAmountColumn.setCellValueFactory(cellData -> cellData.getValue().totalAmountProperty());
         totalAmountColumn.setPrefWidth(100);
         totalAmountColumn.setCellFactory(column -> {
@@ -179,21 +173,21 @@ public class OrdersUI extends Application {
             };
         });
 
-        TableColumn<Order, String> customerIdColumn = new TableColumn<>("Customer ID");
+        TableColumn<Order, String> customerIdColumn = new TableColumn<>("Mã khách hàng");
         customerIdColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty());
-        customerIdColumn.setPrefWidth(100);
+        customerIdColumn.setPrefWidth(110);
 
-        TableColumn<Order, String> methodTypeColumn = new TableColumn<>("Payment Method");
+        TableColumn<Order, String> methodTypeColumn = new TableColumn<>("Phương thức thanh toán");
         methodTypeColumn.setCellValueFactory(cellData -> cellData.getValue().paymentMethodProperty());
-        methodTypeColumn.setPrefWidth(120);
+        methodTypeColumn.setPrefWidth(150);
 
-        TableColumn<Order, Void> actionColumn = new TableColumn<>("Actions");
+        TableColumn<Order, Void> actionColumn = new TableColumn<>("Thao tác");
         actionColumn.setPrefWidth(200);
         actionColumn.setCellFactory(param -> new TableCell<Order, Void>() {
-            private final Button viewBtn = new Button("View");
-            private final Button editBtn = new Button("Edit");
-            private final Button printBtn = new Button("Print");
-            private final Button cancelBtn = new Button("Cancel");
+            private final Button viewBtn = new Button("Xem");
+            private final Button editBtn = new Button("Sửa");
+            private final Button printBtn = new Button("In");
+            private final Button cancelBtn = new Button("Hủy");
 
             {
                 viewBtn.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white;");
@@ -254,29 +248,28 @@ public class OrdersUI extends Application {
         });
 
         ordersTable.getColumns().addAll(orderIdColumn, orderDateColumn, totalAmountColumn, statusColumn,
-                customerIdColumn, methodTypeColumn, actionColumn);
-
-        // Order details section - will be populated when an order is selected
+                customerIdColumn, methodTypeColumn, actionColumn); // Order details section - will be populated when an
+                                                                   // order is selected
         VBox orderDetailsPane = new VBox(10);
         orderDetailsPane.setPadding(new Insets(10));
         orderDetailsPane.setStyle("-fx-background-color: #f8f9fa;");
 
-        Label orderDetailsTitle = new Label("Order Details");
+        Label orderDetailsTitle = new Label("Chi tiết đơn hàng");
         orderDetailsTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         // Table for order items
         TableView<OrderDetail> orderItemsTable = new TableView<>();
         orderItemsTable.setPrefHeight(200);
 
-        TableColumn<OrderDetail, String> orderItemIdColumn = new TableColumn<>("Order ID");
+        TableColumn<OrderDetail, String> orderItemIdColumn = new TableColumn<>("Mã đơn hàng");
         orderItemIdColumn.setCellValueFactory(cellData -> cellData.getValue().orderIdProperty());
-        orderItemIdColumn.setPrefWidth(80);
+        orderItemIdColumn.setPrefWidth(110);
 
-        TableColumn<OrderDetail, String> bookIdColumn = new TableColumn<>("Book ID");
+        TableColumn<OrderDetail, String> bookIdColumn = new TableColumn<>("Mã sách");
         bookIdColumn.setCellValueFactory(cellData -> cellData.getValue().bookIdProperty());
-        bookIdColumn.setPrefWidth(80);
+        bookIdColumn.setPrefWidth(100);
 
-        TableColumn<OrderDetail, Number> unitPriceColumn = new TableColumn<>("Unit Price");
+        TableColumn<OrderDetail, Number> unitPriceColumn = new TableColumn<>("Đơn giá");
         unitPriceColumn.setCellValueFactory(cellData -> cellData.getValue().unitPriceProperty());
         unitPriceColumn.setPrefWidth(100);
         unitPriceColumn.setCellFactory(column -> {
@@ -292,12 +285,11 @@ public class OrdersUI extends Application {
                 }
             };
         });
-
-        TableColumn<OrderDetail, Number> quantityColumn = new TableColumn<>("Quantity");
+        TableColumn<OrderDetail, Number> quantityColumn = new TableColumn<>("Số lượng");
         quantityColumn.setCellValueFactory(cellData -> cellData.getValue().quantityProperty());
         quantityColumn.setPrefWidth(80);
 
-        TableColumn<OrderDetail, Number> subtotalColumn = new TableColumn<>("Subtotal");
+        TableColumn<OrderDetail, Number> subtotalColumn = new TableColumn<>("Thành tiền");
         subtotalColumn.setCellValueFactory(
                 cellData -> cellData.getValue().unitPriceProperty().multiply(cellData.getValue().quantityProperty()));
         subtotalColumn.setPrefWidth(100);
@@ -328,25 +320,24 @@ public class OrdersUI extends Application {
         orderSummary.setHgap(10);
         orderSummary.setVgap(5);
         orderSummary.setPadding(new Insets(10));
-
-        orderSummary.add(new Label("Subtotal:"), 0, 0);
-        Label subtotalLabel = new Label("$0.00");
+        orderSummary.add(new Label("Tạm tính:"), 0, 0);
+        Label subtotalLabel = new Label("0đ");
         orderSummary.add(subtotalLabel, 1, 0);
 
-        orderSummary.add(new Label("Tax:"), 0, 1);
-        Label taxLabel = new Label("$0.00");
+        orderSummary.add(new Label("Thuế:"), 0, 1);
+        Label taxLabel = new Label("0đ");
         orderSummary.add(taxLabel, 1, 1);
 
-        orderSummary.add(new Label("Shipping:"), 0, 2);
-        Label shippingLabel = new Label("$0.00");
+        orderSummary.add(new Label("Phí vận chuyển:"), 0, 2);
+        Label shippingLabel = new Label("0đ");
         orderSummary.add(shippingLabel, 1, 2);
 
-        orderSummary.add(new Label("Total:"), 0, 3);
-        Label totalLabel = new Label("$0.00");
+        orderSummary.add(new Label("Tổng cộng:"), 0, 3);
+        Label totalLabel = new Label("0đ");
         totalLabel.setStyle("-fx-font-weight: bold;");
         orderSummary.add(totalLabel, 1, 3);
 
-        TitledPane orderSummaryPane = new TitledPane("Order Summary", orderSummary);
+        TitledPane orderSummaryPane = new TitledPane("Tổng kết đơn hàng", orderSummary);
         orderSummaryPane.setCollapsible(false);
 
         orderDetailsPane.getChildren().addAll(orderDetailsTitle, orderItemsTable, customerInfoPane, orderSummaryPane);
@@ -355,10 +346,8 @@ public class OrdersUI extends Application {
         orderSplitPane.setDividerPositions(0.6);
 
         ordersBox.getChildren().addAll(orderSplitPane);
-        ordersTab.setContent(ordersBox);
-
-        // Customers tab
-        Tab customersTab = new Tab("Customers");
+        ordersTab.setContent(ordersBox); // Customers tab
+        Tab customersTab = new Tab("Khách hàng");
         VBox customersBox = new VBox(10);
         customersBox.setPadding(new Insets(10));
 
@@ -367,11 +356,11 @@ public class OrdersUI extends Application {
         customersTable.setPrefHeight(300);
         customersTable.setItems(customerData);
 
-        TableColumn<Customer, String> customerIdCustomerColumn = new TableColumn<>("Customer ID");
+        TableColumn<Customer, String> customerIdCustomerColumn = new TableColumn<>("Mã khách hàng");
         customerIdCustomerColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty());
-        customerIdCustomerColumn.setPrefWidth(100);
+        customerIdCustomerColumn.setPrefWidth(120);
 
-        TableColumn<Customer, String> rankColumn = new TableColumn<>("Rank");
+        TableColumn<Customer, String> rankColumn = new TableColumn<>("Hạng");
         rankColumn.setCellValueFactory(cellData -> cellData.getValue().rankProperty());
         rankColumn.setPrefWidth(100);
         rankColumn.setCellFactory(column -> {
@@ -402,12 +391,11 @@ public class OrdersUI extends Application {
                 }
             };
         });
-
         TableColumn<Customer, String> emailColumn = new TableColumn<>("Email");
         emailColumn.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
         emailColumn.setPrefWidth(200);
 
-        TableColumn<Customer, Number> spendingColumn = new TableColumn<>("Total Spending");
+        TableColumn<Customer, Number> spendingColumn = new TableColumn<>("Tổng chi tiêu");
         spendingColumn.setCellValueFactory(cellData -> cellData.getValue().spendingProperty());
         spendingColumn.setPrefWidth(120);
         spendingColumn.setCellFactory(column -> {
@@ -423,13 +411,12 @@ public class OrdersUI extends Application {
                 }
             };
         });
-
-        TableColumn<Customer, Void> customerActionColumn = new TableColumn<>("Actions");
+        TableColumn<Customer, Void> customerActionColumn = new TableColumn<>("Thao tác");
         customerActionColumn.setPrefWidth(200);
         customerActionColumn.setCellFactory(param -> new TableCell<Customer, Void>() {
-            private final Button viewBtn = new Button("View Orders");
-            private final Button editBtn = new Button("Edit");
-            private final Button contactBtn = new Button("Contact");
+            private final Button viewBtn = new Button("Xem đơn hàng");
+            private final Button editBtn = new Button("Sửa");
+            private final Button contactBtn = new Button("Liên hệ");
 
             {
                 viewBtn.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white;");
@@ -500,14 +487,12 @@ public class OrdersUI extends Application {
         HBox.setHgrow(topCustomersBox, Priority.ALWAYS);
 
         customersBox.getChildren().addAll(customersTable, customerStatsSection);
-        customersTab.setContent(customersBox);
-
-        // Analytics tab
-        Tab analyticsTab = new Tab("Analytics");
+        customersTab.setContent(customersBox); // Analytics tab
+        Tab analyticsTab = new Tab("Phân tích");
         VBox analyticsBox = new VBox(10);
         analyticsBox.setPadding(new Insets(10));
 
-        Label analyticsLabel = new Label("Order Analytics");
+        Label analyticsLabel = new Label("Phân tích đơn hàng");
         analyticsLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         // Filter controls for analytics
@@ -515,29 +500,27 @@ public class OrdersUI extends Application {
         analyticsFilters.setPadding(new Insets(10));
         analyticsFilters.setAlignment(Pos.CENTER_LEFT);
 
-        Label periodLabel = new Label("Period:");
+        Label periodLabel = new Label("Thời gian:");
         ComboBox<String> periodComboBox = new ComboBox<>();
-        periodComboBox.getItems().addAll("Last 7 Days", "Last 30 Days", "Last 90 Days", "Last Year", "Custom");
-        periodComboBox.setValue("Last 30 Days");
+        periodComboBox.getItems().addAll("7 ngày qua", "30 ngày qua", "90 ngày qua", "Năm qua", "Tùy chỉnh");
+        periodComboBox.setValue("30 ngày qua");
 
-        Button refreshButton = new Button("Refresh");
+        Button refreshButton = new Button("Làm mới");
         refreshButton.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white;");
 
-        analyticsFilters.getChildren().addAll(periodLabel, periodComboBox, refreshButton);
-
-        // Analytics cards
+        analyticsFilters.getChildren().addAll(periodLabel, periodComboBox, refreshButton); // Analytics cards
         HBox analyticsCards = new HBox(20);
         analyticsCards.setPadding(new Insets(10));
 
-        VBox totalSalesBox = createStatBox("Total Sales", "$4,352.75");
-        VBox avgOrderValueBox = createStatBox("Avg Order Value", "$87.05");
-        VBox repeatCustomersBox = createStatBox("Repeat Customers", "65%");
-        VBox conversionRateBox = createStatBox("Conversion Rate", "23%");
+        VBox totalSalesBox = createStatBox("Tổng doanh số", "4.352.750đ");
+        VBox avgOrderValueBox = createStatBox("Giá trị đơn trung bình", "87.050đ");
+        VBox repeatCustomersBox = createStatBox("Khách hàng quay lại", "65%");
+        VBox conversionRateBox = createStatBox("Tỷ lệ chuyển đổi", "23%");
 
         analyticsCards.getChildren().addAll(totalSalesBox, avgOrderValueBox, repeatCustomersBox, conversionRateBox);
 
         // Placeholder for charts
-        Label chartsLabel = new Label("Sales Trend Charts (Placeholder)");
+        Label chartsLabel = new Label("Biểu đồ xu hướng doanh số (Đang phát triển)");
         chartsLabel.setPadding(new Insets(50));
         chartsLabel.setStyle("-fx-border-color: #cccccc; -fx-border-width: 1px; -fx-background-color: #f8f9fa;");
         chartsLabel.setMaxWidth(Double.MAX_VALUE);

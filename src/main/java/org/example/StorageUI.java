@@ -12,7 +12,6 @@ import javafx.stage.Stage;
 
 public class StorageUI extends Application {
 
-    // Sample data for demonstration
     private ObservableList<Inventory> inventoryData = FXCollections.observableArrayList(
             new Inventory("INV001", "BOOK001", "Harry Potter and the Philosopher's Stone", 58, "In Stock"),
             new Inventory("INV002", "BOOK002", "The Shining", 32, "In Stock"),
@@ -36,7 +35,7 @@ public class StorageUI extends Application {
         topSection.setPadding(new Insets(20));
         topSection.setAlignment(Pos.CENTER);
 
-        Label titleLabel = new Label("Storage Management");
+        Label titleLabel = new Label("Quản lý kho hàng");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
         // Search and buttons section
@@ -44,13 +43,12 @@ public class StorageUI extends Application {
         actionBar.setAlignment(Pos.CENTER);
 
         TextField searchField = new TextField();
-        searchField.setPromptText("Search inventory or orders...");
+        searchField.setPromptText("Tìm kiếm sản phẩm hoặc đơn hàng...");
         searchField.setPrefWidth(300);
 
-        Button searchButton = new Button("Search");
+        Button searchButton = new Button("Tìm kiếm");
         searchButton.setStyle("-fx-background-color: #0066cc; -fx-text-fill: white;");
-
-        Button createNewButton = new Button("Create New Inventory");
+        Button createNewButton = new Button("Thêm vào kho");
         createNewButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px;");
         createNewButton.setOnAction(event -> showCreateNewStorageWindow());
 
@@ -61,29 +59,26 @@ public class StorageUI extends Application {
         statsBar.setPadding(new Insets(10));
         statsBar.setAlignment(Pos.CENTER);
 
-        VBox totalItemsStats = createStatBox("Total Items", "145");
-        VBox inStockStats = createStatBox("In Stock", "130");
-        VBox lowStockStats = createStatBox("Low Stock", "15");
-        VBox outOfStockStats = createStatBox("Out of Stock", "5");
+        VBox totalItemsStats = createStatBox("Tổng sản phẩm", "145");
+        VBox inStockStats = createStatBox("Còn hàng", "130");
+        VBox lowStockStats = createStatBox("Sắp hết", "15");
+        VBox outOfStockStats = createStatBox("Hết hàng", "5");
 
         statsBar.getChildren().addAll(totalItemsStats, inStockStats, lowStockStats, outOfStockStats);
 
         topSection.getChildren().addAll(titleLabel, actionBar, statsBar);
         root.setTop(topSection);
 
-        // Add tables to a TabPane for better organization
         TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        // Inventory tab with table
-        Tab inventoryTab = new Tab("Inventory");
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE); // Inventory tab with table
+        Tab inventoryTab = new Tab("Kho hàng");
         VBox inventoryBox = new VBox(10);
         inventoryBox.setPadding(new Insets(10));
 
         HBox inventoryHeader = new HBox(10);
-        Label inventoryLabel = new Label("Inventory Management");
+        Label inventoryLabel = new Label("Quản lý kho hàng");
         inventoryLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        Button exportInventoryBtn = new Button("Export Inventory");
+        Button exportInventoryBtn = new Button("Xuất báo cáo kho");
         exportInventoryBtn.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white;");
 
         inventoryHeader.getChildren().addAll(inventoryLabel, new Pane(), exportInventoryBtn);
@@ -94,11 +89,11 @@ public class StorageUI extends Application {
         inventoryTable.setPrefHeight(250);
         inventoryTable.setItems(inventoryData);
 
-        TableColumn<Inventory, String> inventoryIdColumn = new TableColumn<>("Inventory ID");
+        TableColumn<Inventory, String> inventoryIdColumn = new TableColumn<>("Mã kho");
         inventoryIdColumn.setCellValueFactory(cellData -> cellData.getValue().inventoryIdProperty());
         inventoryIdColumn.setPrefWidth(100);
 
-        TableColumn<Inventory, String> bookIdColumn = new TableColumn<>("Book ID");
+        TableColumn<Inventory, String> bookIdColumn = new TableColumn<>("Mã sách");
         bookIdColumn.setCellValueFactory(cellData -> cellData.getValue().bookIdProperty());
         bookIdColumn.setPrefWidth(80);
 
@@ -106,11 +101,11 @@ public class StorageUI extends Application {
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         titleColumn.setPrefWidth(200);
 
-        TableColumn<Inventory, Number> quantityColumn = new TableColumn<>("Quantity");
+        TableColumn<Inventory, Number> quantityColumn = new TableColumn<>("Số lượng");
         quantityColumn.setCellValueFactory(cellData -> cellData.getValue().quantityProperty());
         quantityColumn.setPrefWidth(80);
 
-        TableColumn<Inventory, String> statusColumn = new TableColumn<>("Status");
+        TableColumn<Inventory, String> statusColumn = new TableColumn<>("Trạng thái");
         statusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
         statusColumn.setPrefWidth(100);
         statusColumn.setCellFactory(column -> {
@@ -122,25 +117,28 @@ public class StorageUI extends Application {
                         setText(null);
                         setStyle("");
                     } else {
-                        setText(item);
+                        String displayText = item;
                         if ("Out of Stock".equals(item)) {
+                            displayText = "Hết hàng";
                             setStyle("-fx-text-fill: #dc3545; -fx-font-weight: bold;");
                         } else if ("Low Stock".equals(item)) {
+                            displayText = "Sắp hết";
                             setStyle("-fx-text-fill: #ffc107; -fx-font-weight: bold;");
-                        } else {
+                        } else if ("In Stock".equals(item)) {
+                            displayText = "Còn hàng";
                             setStyle("-fx-text-fill: #28a745;");
                         }
+                        setText(displayText);
                     }
                 }
             };
         });
-
-        TableColumn<Inventory, Void> actionColumn = new TableColumn<>("Actions");
+        TableColumn<Inventory, Void> actionColumn = new TableColumn<>("Thao tác");
         actionColumn.setPrefWidth(180);
         actionColumn.setCellFactory(param -> new TableCell<Inventory, Void>() {
-            private final Button editBtn = new Button("Edit");
-            private final Button adjustBtn = new Button("Adjust");
-            private final Button historyBtn = new Button("History");
+            private final Button editBtn = new Button("Sửa");
+            private final Button adjustBtn = new Button("Điều chỉnh");
+            private final Button historyBtn = new Button("Lịch sử");
 
             {
                 editBtn.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
@@ -178,36 +176,38 @@ public class StorageUI extends Application {
                     setGraphic(pane);
                 }
             }
-        });
-
-        inventoryTable.getColumns().addAll(inventoryIdColumn, bookIdColumn, titleColumn, quantityColumn, statusColumn,
-                actionColumn);
+        }); // Thêm từng cột riêng lẻ để tránh cảnh báo type safety
+        inventoryTable.getColumns().add(inventoryIdColumn);
+        inventoryTable.getColumns().add(bookIdColumn);
+        inventoryTable.getColumns().add(titleColumn);
+        inventoryTable.getColumns().add(quantityColumn);
+        inventoryTable.getColumns().add(statusColumn);
+        inventoryTable.getColumns().add(actionColumn);
 
         inventoryBox.getChildren().addAll(inventoryHeader, inventoryTable);
         inventoryTab.setContent(inventoryBox);
 
         // Orders tab with table
-        Tab ordersTab = new Tab("Orders");
+        Tab ordersTab = new Tab("Đơn hàng");
         VBox ordersBox = new VBox(10);
         ordersBox.setPadding(new Insets(10));
 
-        Label ordersLabel = new Label("Order Records");
+        Label ordersLabel = new Label("Lịch sử đơn hàng");
         ordersLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         // Orders table
         TableView<Order> ordersTable = new TableView<>();
         ordersTable.setPrefHeight(250);
         ordersTable.setItems(orderData);
-
-        TableColumn<Order, String> orderIdColumn = new TableColumn<>("Order ID");
+        TableColumn<Order, String> orderIdColumn = new TableColumn<>("Mã đơn hàng");
         orderIdColumn.setCellValueFactory(cellData -> cellData.getValue().orderIdProperty());
         orderIdColumn.setPrefWidth(80);
 
-        TableColumn<Order, String> orderDateColumn = new TableColumn<>("Order Date");
+        TableColumn<Order, String> orderDateColumn = new TableColumn<>("Ngày đặt");
         orderDateColumn.setCellValueFactory(cellData -> cellData.getValue().orderDateProperty());
         orderDateColumn.setPrefWidth(100);
 
-        TableColumn<Order, Number> totalAmountColumn = new TableColumn<>("Total Amount");
+        TableColumn<Order, Number> totalAmountColumn = new TableColumn<>("Tổng tiền");
         totalAmountColumn.setCellValueFactory(cellData -> cellData.getValue().totalAmountProperty());
         totalAmountColumn.setPrefWidth(100);
         totalAmountColumn.setCellFactory(column -> {
@@ -218,13 +218,13 @@ public class StorageUI extends Application {
                     if (item == null || empty) {
                         setText(null);
                     } else {
-                        setText(String.format("$%.2f", item.doubleValue()));
+                        setText(String.format("%.0fđ", item.doubleValue() * 23000)); // Chuyển đổi sang VNĐ
                     }
                 }
             };
         });
 
-        TableColumn<Order, String> orderStatusColumn = new TableColumn<>("Status");
+        TableColumn<Order, String> orderStatusColumn = new TableColumn<>("Trạng thái");
         orderStatusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
         orderStatusColumn.setPrefWidth(100);
         orderStatusColumn.setCellFactory(column -> {
@@ -237,29 +237,34 @@ public class StorageUI extends Application {
                         setStyle("");
                     } else {
                         setText(item);
+                        String displayText = item;
                         if ("Completed".equals(item)) {
+                            displayText = "Hoàn thành";
                             setStyle("-fx-text-fill: #28a745;");
                         } else if ("Shipped".equals(item)) {
+                            displayText = "Đang giao";
                             setStyle("-fx-text-fill: #007bff;");
                         } else if ("Processing".equals(item)) {
+                            displayText = "Đang xử lý";
                             setStyle("-fx-text-fill: #fd7e14;");
-                        } else {
+                        } else if ("Pending".equals(item)) {
+                            displayText = "Chờ xử lý";
                             setStyle("-fx-text-fill: #6c757d;");
                         }
+                        setText(displayText);
                     }
                 }
             };
         });
-
-        TableColumn<Order, String> customerIdColumn = new TableColumn<>("Customer ID");
+        TableColumn<Order, String> customerIdColumn = new TableColumn<>("Mã khách hàng");
         customerIdColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty());
         customerIdColumn.setPrefWidth(100);
 
-        TableColumn<Order, Void> orderActionColumn = new TableColumn<>("Actions");
+        TableColumn<Order, Void> orderActionColumn = new TableColumn<>("Thao tác");
         orderActionColumn.setPrefWidth(180);
         orderActionColumn.setCellFactory(param -> new TableCell<Order, Void>() {
-            private final Button viewBtn = new Button("View");
-            private final Button updateBtn = new Button("Update Status");
+            private final Button viewBtn = new Button("Xem");
+            private final Button updateBtn = new Button("Cập nhật");
 
             {
                 viewBtn.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
@@ -290,37 +295,42 @@ public class StorageUI extends Application {
                     setGraphic(pane);
                 }
             }
-        });
-
-        ordersTable.getColumns().addAll(orderIdColumn, orderDateColumn, totalAmountColumn, orderStatusColumn,
-                customerIdColumn, orderActionColumn);
+        }); // Thêm từng cột riêng lẻ để tránh cảnh báo type safety
+        ordersTable.getColumns().add(orderIdColumn);
+        ordersTable.getColumns().add(orderDateColumn);
+        ordersTable.getColumns().add(totalAmountColumn);
+        ordersTable.getColumns().add(orderStatusColumn);
+        ordersTable.getColumns().add(customerIdColumn);
+        ordersTable.getColumns().add(orderActionColumn);
 
         ordersBox.getChildren().addAll(ordersLabel, ordersTable);
         ordersTab.setContent(ordersBox);
 
         // Stock Alerts tab
-        Tab alertsTab = new Tab("Stock Alerts");
-        VBox alertsBox = createPlaceholderContent("Stock alerts and notifications will be displayed here");
+        Tab alertsTab = new Tab("Cảnh báo kho");
+        VBox alertsBox = createPlaceholderContent("Thông báo và cảnh báo về kho hàng sẽ hiển thị tại đây");
         alertsTab.setContent(alertsBox);
 
         // Stock Movement tab
-        Tab movementTab = new Tab("Stock Movement");
-        VBox movementBox = createPlaceholderContent("Stock movement history will be displayed here");
+        Tab movementTab = new Tab("Di chuyển hàng");
+        VBox movementBox = createPlaceholderContent("Lịch sử di chuyển hàng hóa sẽ hiển thị tại đây");
         movementTab.setContent(movementBox);
 
-        tabPane.getTabs().addAll(inventoryTab, ordersTab, alertsTab, movementTab);
-        root.setCenter(tabPane);
-
-        // Status bar at the bottom
+        // Thêm từng tab riêng lẻ để tránh cảnh báo type safety
+        tabPane.getTabs().add(inventoryTab);
+        tabPane.getTabs().add(ordersTab);
+        tabPane.getTabs().add(alertsTab);
+        tabPane.getTabs().add(movementTab);
+        root.setCenter(tabPane); // Status bar at the bottom
         HBox statusBar = new HBox(10);
         statusBar.setPadding(new Insets(5, 10, 5, 10));
         statusBar.setStyle("-fx-background-color: #f8f9fa;");
-        Label statusLabel = new Label("Ready");
+        Label statusLabel = new Label("Sẵn sàng");
         statusBar.getChildren().add(statusLabel);
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 900, 700);
-        primaryStage.setTitle("Book Store Management - Storage");
+        primaryStage.setTitle("Quản lý hiệu sách - Kho hàng");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

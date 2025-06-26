@@ -17,7 +17,6 @@ import javafx.stage.Stage;
 
 public class ProductsUI extends Application {
 
-    // Sample data for demonstration
     private ObservableList<Publisher> publisherData = FXCollections.observableArrayList(
             new Publisher("PUB001", "Penguin Random House", "1935-07-24", "English"),
             new Publisher("PUB002", "HarperCollins", "1989-01-30", "English"),
