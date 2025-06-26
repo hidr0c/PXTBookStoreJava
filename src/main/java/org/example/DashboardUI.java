@@ -84,11 +84,11 @@ public class DashboardUI extends Application {
 
         Label welcomeLabel = new Label("Welcome to the Book Store Management System");
         welcomeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-        
+
         VBox dashboardStatsContent = DashboardStats.createDashboardContent();
 
-        // 2. Add the remaining parts of the existing dashboard (welcome label, tables, etc.)
-
+        // 2. Add the remaining parts of the existing dashboard (welcome label, tables,
+        // etc.)
 
         // Recent Orders table
         TableView<Object> recentOrdersTable = new TableView<>();
@@ -125,11 +125,10 @@ public class DashboardUI extends Application {
         lowStockLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         dashboardContent.getChildren().addAll(
-            welcomeLabel,
-            dashboardStatsContent,
-            recentOrdersLabel, recentOrdersTable,
-            lowStockLabel, lowStockTable
-        );
+                welcomeLabel,
+                dashboardStatsContent,
+                recentOrdersLabel, recentOrdersTable,
+                lowStockLabel, lowStockTable);
 
         // Wrap the dashboardContent VBox in a ScrollPane
         ScrollPane scrollPane = new ScrollPane(dashboardContent);
@@ -382,12 +381,12 @@ public class DashboardUI extends Application {
             TableView<Object> ordersTable = new TableView<>();
             ordersTable.setPrefHeight(200);
 
-            TableColumn<Object, String> orderIdColumn = new TableColumn<>("Order ID");
-            TableColumn<Object, String> orderDateColumn = new TableColumn<>("Order Date");
-            TableColumn<Object, String> totalAmountColumn = new TableColumn<>("Total Amount");
-            TableColumn<Object, String> statusColumn = new TableColumn<>("Status");
-            TableColumn<Object, String> customerIdColumn = new TableColumn<>("Customer ID");
-            TableColumn<Object, String> methodTypeColumn = new TableColumn<>("Method Type");
+            TableColumn<Object, String> orderIdColumn = new TableColumn<>("Mã hóa đơn");
+            TableColumn<Object, String> orderDateColumn = new TableColumn<>("Ngày đặt");
+            TableColumn<Object, String> totalAmountColumn = new TableColumn<>("Tổng tiền");
+            TableColumn<Object, String> statusColumn = new TableColumn<>("Trạng thái");
+            TableColumn<Object, String> customerIdColumn = new TableColumn<>("Mã khách hàng");
+            TableColumn<Object, String> methodTypeColumn = new TableColumn<>("Phương thức");
 
             ordersTable.getColumns().add(orderIdColumn);
             ordersTable.getColumns().add(orderDateColumn);
@@ -399,11 +398,11 @@ public class DashboardUI extends Application {
             TableView<Object> customersTable = new TableView<>();
             customersTable.setPrefHeight(150);
 
-            TableColumn<Object, String> customerIdCustomerColumn = new TableColumn<>("Customer ID");
-            TableColumn<Object, String> rankColumn = new TableColumn<>("Rank");
+            TableColumn<Object, String> customerIdCustomerColumn = new TableColumn<>("Mã khách hàng");
+            TableColumn<Object, String> rankColumn = new TableColumn<>("Hạng");
             TableColumn<Object, String> emailColumn = new TableColumn<>("Email");
-            TableColumn<Object, String> spendingColumn = new TableColumn<>("Spending");
-            TableColumn<Object, String> methodTypeCustomerColumn = new TableColumn<>("Method Type");
+            TableColumn<Object, String> spendingColumn = new TableColumn<>("Chi tiêu");
+            TableColumn<Object, String> methodTypeCustomerColumn = new TableColumn<>("Phương thức");
 
             customersTable.getColumns().add(customerIdCustomerColumn);
             customersTable.getColumns().add(rankColumn);
