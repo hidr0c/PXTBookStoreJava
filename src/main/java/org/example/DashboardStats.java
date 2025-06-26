@@ -143,11 +143,16 @@ public class DashboardStats {
                     categoryTotals.put(category, categoryTotals.getOrDefault(category, 0.0) + amount);
             }
         }
+        Label revenueLabel = new Label("Doanh thu theo tháng");
+        revenueLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        Label cusLabel = new Label("Khách hàng hàng đầu");
+        cusLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        Label cateLabel = new Label("Thể loại yêu thích");
+        cateLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         // Monthly Revenue Chart
         NumberAxis yAxis = new NumberAxis();
         LineChart<String, Number> revenueChart = new LineChart<>(new javafx.scene.chart.CategoryAxis(), yAxis);
-        revenueChart.setTitle("Doanh thu tháng");
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         for (String month : monthlyRevenue.keySet()) {
             series.getData().add(new XYChart.Data<>(month, monthlyRevenue.get(month)));
@@ -224,10 +229,10 @@ public class DashboardStats {
 
         // Layout
         VBox vbox = new VBox(20,
-                new Label("Doanh thu theo tháng"), revenueChart,
-                new Label("Khách hàng hàng đầu"), customerTable,
-                new Label("Thể loại yêu thích"), categoryTable);
-        vbox.setPadding(new Insets(20));
+                revenueLabel, revenueChart,
+                cusLabel, customerTable,
+                cateLabel, categoryTable);
+        vbox.setPadding(new Insets(10));
         return vbox;
     }
 }

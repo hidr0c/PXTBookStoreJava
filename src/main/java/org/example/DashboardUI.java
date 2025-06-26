@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
@@ -63,7 +64,7 @@ public class DashboardUI extends Application {
 
         // Create scene
         Scene scene = new Scene(mainLayout, 1000, 700);
-        primaryStage.setTitle("Book Store Management System");
+        primaryStage.setTitle("Hệ thống quản lý cửa hàng sách");
         primaryStage.setScene(scene);
         primaryStage.show(); // Add action listeners for navigation buttons
         dashboardButton.setOnAction(e -> showDashboardContent());
@@ -89,13 +90,17 @@ public class DashboardUI extends Application {
     private void showDashboardContent() {
         contentArea.getChildren().clear();
 
+        // Create a VBox to hold all dashboard content
         VBox dashboardContent = new VBox(20);
         dashboardContent.setPadding(new Insets(10));
 
         Label welcomeLabel = new Label("Welcome to the Book Store Management System");
         welcomeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        
+        VBox dashboardStatsContent = DashboardStats.createDashboardContent();
 
-        // Summary tables
+        // 2. Add the remaining parts of the existing dashboard (welcome label, tables, etc.)
+
 
         // Recent Orders table
         TableView<Object> recentOrdersTable = new TableView<>();
@@ -131,9 +136,18 @@ public class DashboardUI extends Application {
         Label lowStockLabel = new Label("Low Stock Items");
         lowStockLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        dashboardContent.getChildren().addAll(welcomeLabel, recentOrdersLabel, recentOrdersTable, lowStockLabel,
-                lowStockTable);
-        contentArea.getChildren().add(dashboardContent);
+        dashboardContent.getChildren().addAll(
+            welcomeLabel,
+            dashboardStatsContent,
+            recentOrdersLabel, recentOrdersTable,
+            lowStockLabel, lowStockTable
+        );
+
+        // Wrap the dashboardContent VBox in a ScrollPane
+        ScrollPane scrollPane = new ScrollPane(dashboardContent);
+        scrollPane.setFitToWidth(true);
+
+        contentArea.getChildren().add(scrollPane);
     }
 
     private void showStorageUI() {
