@@ -79,7 +79,7 @@ public class LoginUI extends Application {
                 return;
             }
 
-            MongoCollection<Document> usersCollection = database.getCollection("users");
+            MongoCollection<Document> usersCollection = database.getCollection("Account");
 
             System.out.println("--- All users in 'users' collection ---");
             for (Document doc : usersCollection.find()) {
