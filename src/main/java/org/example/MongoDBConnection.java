@@ -6,7 +6,7 @@ import com.mongodb.client.MongoDatabase;
 
 public class MongoDBConnection {
     private static final String CONNECTION_STRING = "mongodb+srv://baonguyentc6:0916753443aA@cluster0.xqz8l9y.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-    private static final String DATABASE_NAME = "SmartLib";
+    private static final String DATABASE_NAME = "BookDatabase";
     
     private static MongoClient mongoClient = null;
     private static MongoDatabase database = null;
