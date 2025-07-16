@@ -27,14 +27,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 
-@SuppressWarnings("unused") // Suppress warnings for unused getters and lambda parameters
+@SuppressWarnings("unused")
 public class DashboardStats {
-    @SuppressWarnings("unused") // Suppress warnings for unused getters required by JavaFX properties
+    // Model đơn giản cho hóa đơn, khách hàng, thể loại
     private static class Invoice {
         String invoiceNumber, salesperson, status, customer, date;
         double amount;
 
-        Invoice(String i, String s, String st, String c, String d, double a) {
+        public Invoice(String i, String s, String st, String c, String d, double a) {
             invoiceNumber = i;
             salesperson = s;
             status = st;
@@ -68,12 +68,11 @@ public class DashboardStats {
         }
     }
 
-    @SuppressWarnings("unused") // Suppress warnings for unused getters required by JavaFX properties
     private static class CustomerStat {
         String customer;
         double total;
 
-        CustomerStat(String c, double t) {
+        public CustomerStat(String c, double t) {
             customer = c;
             total = t;
         }
@@ -87,12 +86,11 @@ public class DashboardStats {
         }
     }
 
-    @SuppressWarnings("unused") // Suppress warnings for unused getters required by JavaFX properties
     private static class CategoryStat {
         String category;
         double total;
 
-        CategoryStat(String c, double t) {
+        public CategoryStat(String c, double t) {
             category = c;
             total = t;
         }
@@ -107,15 +105,12 @@ public class DashboardStats {
     }
 
     public static VBox createDashboardContent() {
-        // Fetch data from MongoDB
         MongoDatabase db = MongoDBConnection.getDatabase();
         MongoCollection<Document> sales = db.getCollection("sales");
-
         List<Invoice> invoices = new ArrayList<>();
         Map<String, Double> monthlyRevenue = new TreeMap<>();
         Map<String, Double> customerTotals = new HashMap<>();
         Map<String, Double> categoryTotals = new HashMap<>();
-
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         try (MongoCursor<Document> cursor = sales.find().iterator()) {
             while (cursor.hasNext()) {
@@ -127,18 +122,11 @@ public class DashboardStats {
                 String date = doc.getString("date");
                 double amount = doc.getDouble("amount");
                 String category = doc.getString("category");
-
                 invoices.add(new Invoice(invoiceNumber, salesperson, status, customer, date, amount));
-
-                // Monthly revenue
                 LocalDate localDate = LocalDate.parse(date, dtf);
                 String month = localDate.getMonth() + " " + localDate.getYear();
                 monthlyRevenue.put(month, monthlyRevenue.getOrDefault(month, 0.0) + amount);
-
-                // Customer totals
                 customerTotals.put(customer, customerTotals.getOrDefault(customer, 0.0) + amount);
-
-                // Category totals
                 if (category != null)
                     categoryTotals.put(category, categoryTotals.getOrDefault(category, 0.0) + amount);
             }
@@ -149,8 +137,6 @@ public class DashboardStats {
         cusLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         Label cateLabel = new Label("Thể loại yêu thích");
         cateLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
-        // Monthly Revenue Chart
         NumberAxis yAxis = new NumberAxis();
         LineChart<String, Number> revenueChart = new LineChart<>(new javafx.scene.chart.CategoryAxis(), yAxis);
         XYChart.Series<String, Number> series = new XYChart.Series<>();
@@ -158,76 +144,52 @@ public class DashboardStats {
             series.getData().add(new XYChart.Data<>(month, monthlyRevenue.get(month)));
         }
         revenueChart.getData().add(series);
-
-        // Top Customers Table
         TableView<CustomerStat> customerTable = new TableView<>();
-        ObservableList<CustomerStat> customerStats = FXCollections.observableArrayList(
-                customerTotals.entrySet().stream()
-                        .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-                        .limit(5)
-                        .map(e -> new CustomerStat(e.getKey(), e.getValue()))
-                        .toList());
-        TableColumn<CustomerStat, Void> colCustNo = new TableColumn<>("STT");
-        colCustNo.setCellFactory(col -> {
-            // Lambda parameter not used, but required by interface
-            return new TableCell<CustomerStat, Void>() {
-                @Override
-                protected void updateItem(Void item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setText(empty ? null : String.valueOf(getIndex() + 1));
-                }
-            };
+        ObservableList<CustomerStat> customerStats = FXCollections.observableArrayList();
+        customerTotals.entrySet().stream()
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+                .limit(5)
+                .forEach(e -> customerStats.add(new CustomerStat(e.getKey(), e.getValue())));
+        TableColumn<CustomerStat, String> colCustNo = new TableColumn<>("STT");
+        colCustNo.setCellFactory(col -> new TableCell<CustomerStat, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : String.valueOf(getIndex() + 1));
+            }
         });
-        colCustNo.setPrefWidth(50); // Small width for numbering
-
+        colCustNo.setPrefWidth(50);
         TableColumn<CustomerStat, String> colCustName = new TableColumn<>("Khách hàng");
         colCustName.setCellValueFactory(new PropertyValueFactory<>("customer"));
         colCustName.setPrefWidth(500);
-
         TableColumn<CustomerStat, Double> colCustTotal = new TableColumn<>("Số lượng");
         colCustTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colCustTotal.setPrefWidth(200);
-
         customerTable.setItems(customerStats);
-        customerTable.getColumns().add(colCustNo);
-        customerTable.getColumns().add(colCustName);
-        customerTable.getColumns().add(colCustTotal);
-
-        // Top Categories Table
+        customerTable.getColumns().addAll(colCustNo, colCustName, colCustTotal);
         TableView<CategoryStat> categoryTable = new TableView<>();
-        ObservableList<CategoryStat> categoryStats = FXCollections.observableArrayList(
-                categoryTotals.entrySet().stream()
-                        .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-                        .limit(5)
-                        .map(e -> new CategoryStat(e.getKey(), e.getValue()))
-                        .toList());
-        TableColumn<CategoryStat, Void> colCatNo = new TableColumn<>("STT");
-        colCatNo.setCellFactory(col -> {
-            // Lambda parameter not used, but required by interface
-            return new TableCell<CategoryStat, Void>() {
-                @Override
-                protected void updateItem(Void item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setText(empty ? null : String.valueOf(getIndex() + 1));
-                }
-            };
+        ObservableList<CategoryStat> categoryStats = FXCollections.observableArrayList();
+        categoryTotals.entrySet().stream()
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+                .limit(5)
+                .forEach(e -> categoryStats.add(new CategoryStat(e.getKey(), e.getValue())));
+        TableColumn<CategoryStat, String> colCatNo = new TableColumn<>("STT");
+        colCatNo.setCellFactory(col -> new TableCell<CategoryStat, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : String.valueOf(getIndex() + 1));
+            }
         });
         colCatNo.setPrefWidth(50);
-
         TableColumn<CategoryStat, String> colCatName = new TableColumn<>("Thể loại");
         colCatName.setCellValueFactory(new PropertyValueFactory<>("category"));
         colCatName.setPrefWidth(500);
-
         TableColumn<CategoryStat, Double> colCatTotal = new TableColumn<>("Số lượng");
         colCatTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colCatTotal.setPrefWidth(200);
-
         categoryTable.setItems(categoryStats);
-        categoryTable.getColumns().add(colCatNo);
-        categoryTable.getColumns().add(colCatName);
-        categoryTable.getColumns().add(colCatTotal);
-
-        // Layout
+        categoryTable.getColumns().addAll(colCatNo, colCatName, colCatTotal);
         VBox vbox = new VBox(20,
                 revenueLabel, revenueChart,
                 cusLabel, customerTable,

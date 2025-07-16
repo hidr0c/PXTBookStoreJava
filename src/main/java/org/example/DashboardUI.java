@@ -22,32 +22,41 @@ public class DashboardUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        // Khởi tạo cửa sổ chính
         this.primaryStage = primaryStage;
+        // Hiển thị giao diện dashboard
         showDashboard();
     }
 
     public void showDashboard() {
         mainLayout = new BorderPane();
-
         VBox drawer = new VBox(10);
-        drawer.setPadding(new Insets(10));
+        drawer.setPadding(new Insets(20));
         drawer.setStyle("-fx-background-color: #f0f0f0;");
         drawer.setPrefWidth(200);
-
-        Button dashboardButton = createNavButton("Dashboard");
-        Button storageButton = createNavButton("Quản lý kho");
-        Button productButton = createNavButton("Quản lý sản phẩm");
-        Button staffButton = createNavButton("Quản lý nhân viên");
-        Button ordersButton = createNavButton("Quản lý hóa đơn");
-
-        Button[] buttons = { dashboardButton, storageButton, productButton, staffButton, ordersButton };
+        // Sidebar thuần tiếng Việt, bổ sung các chức năng mới
+        Button dashboardButton = new Button("Trang chủ");
+        Button storageButton = new Button("Quản lý kho");
+        Button productButton = new Button("Quản lý sản phẩm");
+        Button staffButton = new Button("Quản lý nhân viên");
+        Button supplierButton = new Button("Quản lý nhà cung cấp");
+        Button authorButton = new Button("Quản lý tác giả");
+        Button ordersButton = new Button("Quản lý hóa đơn");
+        Button[] buttons = { dashboardButton, storageButton, productButton, staffButton, supplierButton, authorButton,
+                ordersButton };
         for (Button btn : buttons) {
-            btn.setMaxHeight(Double.MAX_VALUE);
-            VBox.setVgrow(btn, Priority.ALWAYS);
-            btn.setPadding(new Insets(10));
+            btn.setMaxWidth(Double.MAX_VALUE);
+            btn.setPrefHeight(48);
+            btn.setStyle(
+                    "-fx-background-color: #0066cc; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;");
+            btn.setOnMouseEntered(e -> btn.setStyle(
+                    "-fx-background-color: #3399ff; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;"));
+            btn.setOnMouseExited(e -> btn.setStyle(
+                    "-fx-background-color: #0066cc; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;"));
         }
-
         drawer.getChildren().addAll(buttons);
+
+        // Tạo vùng hiển thị nội dung
         contentArea = new StackPane();
         contentArea.setPadding(new Insets(20));
         showDashboardContent();
@@ -55,6 +64,7 @@ public class DashboardUI extends Application {
         mainLayout.setLeft(drawer);
         mainLayout.setCenter(contentArea);
 
+        // Tạo scene và hiển thị
         Scene scene = new Scene(mainLayout, 1000, 700);
         primaryStage.setTitle("Hệ thống quản lý cửa hàng sách");
         primaryStage.setScene(scene);
@@ -64,15 +74,6 @@ public class DashboardUI extends Application {
         productButton.setOnAction(e -> showProductsUI());
         staffButton.setOnAction(e -> showStaffUI());
         ordersButton.setOnAction(e -> showOrdersUI());
-    }
-
-    private Button createNavButton(String text) {
-        Button button = new Button(text);
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setPrefHeight(60);
-        button.setStyle(
-                "-fx-background-color: #0066cc; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-        return button;
     }
 
     private void showDashboardContent() {
@@ -139,7 +140,7 @@ public class DashboardUI extends Application {
 
     private void showStorageUI() {
         contentArea.getChildren().clear();
-        
+
         // Create storage content using the Storage class
         Storage storage = new Storage();
         BorderPane storageContent = storage.createStorageContent();
@@ -149,7 +150,7 @@ public class DashboardUI extends Application {
 
     private void showProductsUI() {
         contentArea.getChildren().clear();
-        
+
         // Create product content using the Product class
         Product product = new Product();
         BorderPane productContent = product.createProductContent();
@@ -159,7 +160,7 @@ public class DashboardUI extends Application {
 
     private void showStaffUI() {
         contentArea.getChildren().clear();
-        
+
         // Create staff content using the Staff class
         Staff staff = new Staff();
         BorderPane staffContent = staff.createStaffContent();
@@ -169,7 +170,7 @@ public class DashboardUI extends Application {
 
     private void showOrdersUI() {
         contentArea.getChildren().clear();
-        
+
         // Create order content using the Order class
         Order order = new Order();
         BorderPane orderContent = order.createOrderContent();

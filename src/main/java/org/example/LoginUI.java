@@ -9,7 +9,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -23,43 +22,56 @@ public class LoginUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        // Khởi tạo cửa sổ chính
         this.primaryStage = primaryStage;
+        // Hiển thị giao diện đăng nhập
         showLogin();
     }
 
     public void showLogin() {
+        // Tạo layout chính dạng VBox, cách đều 20px
         VBox root = new VBox(20);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: white;");
 
+        // Tạo tiêu đề
         Text titleText = new Text("App quản lý cửa hàng bán sách");
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         titleText.setFill(Color.rgb(0, 102, 204));
 
+        // Tạo lưới nhập liệu
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
+
+        // Tạo label và textfield cho email
         Label userLabel = new Label("Email:");
         TextField userField = new TextField();
         userField.setPromptText("Nhập email");
         grid.add(userLabel, 0, 0);
         grid.add(userField, 1, 0);
+
+        // Tạo label và passwordfield cho mật khẩu
         Label passLabel = new Label("Mật khẩu:");
         PasswordField passField = new PasswordField();
         passField.setPromptText("Nhập mật khẩu");
         grid.add(passLabel, 0, 1);
         grid.add(passField, 1, 1);
-        Button loginButton = new Button("Login");
+
+        // Tạo nút đăng nhập
+        Button loginButton = new Button("Đăng nhập");
         loginButton.setStyle("-fx-background-color: #00994c; -fx-text-fill: white; -fx-font-weight: bold;");
         loginButton.setPrefWidth(200);
 
+        // Thêm các thành phần vào layout chính
         root.getChildren().addAll(titleText, grid, loginButton);
 
+        // Tạo scene và hiển thị
         Scene scene = new Scene(root, 400, 300);
-        primaryStage.setTitle("Login");
+        primaryStage.setTitle("Đăng nhập");
         primaryStage.setScene(scene);
         primaryStage.show();
 
