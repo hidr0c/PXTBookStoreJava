@@ -6,8 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -87,48 +85,10 @@ public class DashboardUI extends Application {
 
         VBox dashboardStatsContent = DashboardStats.createDashboardContent();
 
-        // 2. Add the remaining parts of the existing dashboard (welcome label, tables,
-        // etc.)
-
-        // Recent Orders table
-        TableView<Object> recentOrdersTable = new TableView<>();
-        recentOrdersTable.setPrefHeight(200);
-
-        TableColumn<Object, String> orderIdColumn = new TableColumn<>("Order ID");
-        TableColumn<Object, String> dateColumn = new TableColumn<>("Date");
-        TableColumn<Object, String> customerColumn = new TableColumn<>("Customer");
-        TableColumn<Object, String> totalColumn = new TableColumn<>("Total");
-
-        recentOrdersTable.getColumns().add(orderIdColumn);
-        recentOrdersTable.getColumns().add(dateColumn);
-        recentOrdersTable.getColumns().add(customerColumn);
-        recentOrdersTable.getColumns().add(totalColumn);
-
-        Label recentOrdersLabel = new Label("Recent Orders");
-        recentOrdersLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
-        // Low Stock Items table
-        TableView<Object> lowStockTable = new TableView<>();
-        lowStockTable.setPrefHeight(200);
-
-        TableColumn<Object, String> bookIdColumn = new TableColumn<>("Book ID");
-        TableColumn<Object, String> titleColumn = new TableColumn<>("Title");
-        TableColumn<Object, String> quantityColumn = new TableColumn<>("Quantity");
-        TableColumn<Object, String> reorderColumn = new TableColumn<>("Reorder Level");
-
-        lowStockTable.getColumns().add(bookIdColumn);
-        lowStockTable.getColumns().add(titleColumn);
-        lowStockTable.getColumns().add(quantityColumn);
-        lowStockTable.getColumns().add(reorderColumn);
-
-        Label lowStockLabel = new Label("Low Stock Items");
-        lowStockLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
         dashboardContent.getChildren().addAll(
                 welcomeLabel,
-                dashboardStatsContent,
-                recentOrdersLabel, recentOrdersTable,
-                lowStockLabel, lowStockTable);
+                dashboardStatsContent
+        );
 
         // Wrap the dashboardContent VBox in a ScrollPane
         ScrollPane scrollPane = new ScrollPane(dashboardContent);
