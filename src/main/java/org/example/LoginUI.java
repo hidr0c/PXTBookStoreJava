@@ -1,7 +1,5 @@
 package org.example;
 
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -9,14 +7,13 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.bson.Document;
+import java.sql.*;
 
 public class LoginUI extends Application {
     private Stage primaryStage;
@@ -65,46 +62,36 @@ public class LoginUI extends Application {
 
         // Login button action
         loginButton.setOnAction(e -> {
-            String username = userField.getText();
+            String email = userField.getText();
             String password = passField.getText();
 
-            System.out.println("Attempting login with:");
-            System.out.println("  Username (email): " + username);
-            System.out.println("  Password: " + password);
-
-            MongoDatabase database = MongoDBConnection.getDatabase();
-            if (database == null) {
-                System.out.println("Database connection is null. Cannot proceed with login.");
-                showError("Database connection failed!");
-                return;
-            }
-
-            MongoCollection<Document> usersCollection = database.getCollection("Account");
-
-            System.out.println("--- All users in 'users' collection ---");
-            for (Document doc : usersCollection.find()) {
-                System.out.println(doc.toJson());
-            }
-            System.out.println("---------------------------------------");
-
-            Document query = new Document("email", username).append("password", password);
-            System.out.println("  MongoDB Query: " + query.toJson());
-
-            Document user = usersCollection.find(query).first();
-
-            if (user != null) {
-                System.out.println("Login successful for user: " + username);
-                primaryStage.close();
-                Platform.runLater(() -> {
-                    try {
-                        new DashboardUI().start(new Stage());
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                });
-            } else {
-                System.out.println("Login failed: Invalid credentials for user: " + username);
-                showError("Invalid credentials!");
+            try {
+                Connection conn = MySQLConnection.getConnection();
+                if (conn == null) {
+                    showError("Database connection failed!");
+                    return;
+                }
+                String sql = "SELECT * FROM Accounts WHERE email=? AND pass=?";
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ps.setString(1, email);
+                ps.setString(2, password);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    // Đăng nhập thành công
+                    primaryStage.close();
+                    Platform.runLater(() -> {
+                        try {
+                            new DashboardUI().start(new Stage());
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                } else {
+                    showError("Invalid credentials!");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showError("Database error!");
             }
         });
     }
