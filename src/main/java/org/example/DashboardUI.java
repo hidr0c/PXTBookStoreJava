@@ -35,7 +35,7 @@ public class DashboardUI extends Application {
         Button dashboardButton = createNavButton("Dashboard");
         Button storageButton = createNavButton("Quản lý kho");
         Button productButton = createNavButton("Quản lý sản phẩm");
-        Button staffButton = createNavButton("Quản lý nhân viên");
+        Button staffButton = createNavButton("Quản lý user");
         Button ordersButton = createNavButton("Quản lý hóa đơn");
 
         Button[] buttons = { dashboardButton, storageButton, productButton, staffButton, ordersButton };
@@ -83,11 +83,12 @@ public class DashboardUI extends Application {
         Label welcomeLabel = new Label("Welcome to the Book Store Management System");
         welcomeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-        VBox dashboardStatsContent = DashboardStats.createDashboardContent();
+        // XÓA hoặc COMMENT tất cả các dòng liên quan đến DashboardStats (import, gọi hàm, biến, ...)
+        // VBox dashboardStatsContent = DashboardStats.createDashboardContent();
 
         dashboardContent.getChildren().addAll(
-                welcomeLabel,
-                dashboardStatsContent
+                welcomeLabel
+                // đã xóa dashboardStatsContent
         );
 
         // Wrap the dashboardContent VBox in a ScrollPane
@@ -99,41 +100,25 @@ public class DashboardUI extends Application {
 
     private void showStorageUI() {
         contentArea.getChildren().clear();
-        
-        // Create storage content using the Storage class
-        Storage storage = new Storage();
-        BorderPane storageContent = storage.createStorageContent();
-
+        BorderPane storageContent = Storage.createStorageContent();
         contentArea.getChildren().add(storageContent);
     }
 
     private void showProductsUI() {
         contentArea.getChildren().clear();
-        
-        // Create product content using the Product class
-        Product product = new Product();
-        BorderPane productContent = product.createProductContent();
-
+        BorderPane productContent = Product.createProductContent();
         contentArea.getChildren().add(productContent);
     }
 
     private void showStaffUI() {
         contentArea.getChildren().clear();
-        
-        // Create staff content using the Staff class
-        Staff staff = new Staff();
-        BorderPane staffContent = staff.createStaffContent();
-
-        contentArea.getChildren().add(staffContent);
+        BorderPane userContent = UserUI.createUserContent();
+        contentArea.getChildren().add(userContent);
     }
 
     private void showOrdersUI() {
         contentArea.getChildren().clear();
-        
-        // Create order content using the Order class
-        Order order = new Order();
-        BorderPane orderContent = order.createOrderContent();
-
+        BorderPane orderContent = Order.createOrderContent();
         contentArea.getChildren().add(orderContent);
     }
 

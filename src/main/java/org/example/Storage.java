@@ -3,246 +3,302 @@ package org.example;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.layout.HBox;
+import javafx.beans.property.SimpleIntegerProperty;
+import java.sql.*;
 
 public class Storage extends Application {
-    
+    private static TableView<StorageRow> tvStorage;
+    private static ObservableList<StorageRow> dataStorage = FXCollections.observableArrayList();
+    private static ComboBox<String> cbBookID;
+    private static TextField tfQuantity;
+    private static Button btnAddStorage, btnEditStorage, btnDeleteStorage, btnClearStorage;
+
     @Override
     public void start(Stage primaryStage) {
         BorderPane storageContent = createStorageContent();
         Scene scene = new Scene(storageContent, 800, 600);
-        primaryStage.setTitle("Storage Management");
+        primaryStage.setTitle("Quản lý kho");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-    
-    public BorderPane createStorageContent() {
-        BorderPane storageContent = new BorderPane();
 
-        VBox topContent = new VBox();
-        Label titleLabel = new Label("Storage Management");
-        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+    public static BorderPane createStorageContent() {
+        BorderPane borderpane = new BorderPane();
+        borderpane.setPadding(new Insets(30));
+        borderpane.setTop(createStorageForm());
+        borderpane.setCenter(createStorageTable());
+        loadStorage();
+        return borderpane;
+    }
 
-        Button createNewButton = new Button("Create New Storage Item");
-        createNewButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px;");
+    private static VBox createStorageForm() {
+        VBox form = new VBox(10);
+        form.setPadding(new Insets(10));
+        Label title = new Label("Quản lý kho");
+        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        HBox row1 = new HBox(10);
+        cbBookID = new ComboBox<>(); cbBookID.setPromptText("Mã sách");
+        loadBookIDs();
+        row1.getChildren().addAll(new Label("Mã sách:"), cbBookID);
+        HBox row2 = new HBox(10);
+        tfQuantity = new TextField(); tfQuantity.setPromptText("Số lượng nhập");
+        row2.getChildren().addAll(new Label("Số lượng nhập:"), tfQuantity);
+        HBox row3 = new HBox(10);
+        btnAddStorage = new Button("Thêm");
+        btnEditStorage = new Button("Sửa");
+        btnDeleteStorage = new Button("Xóa");
+        btnClearStorage = new Button("Clear");
+        btnEditStorage.setDisable(true);
+        btnDeleteStorage.setDisable(true);
+        row3.getChildren().addAll(btnAddStorage, btnEditStorage, btnDeleteStorage, btnClearStorage);
+        form.getChildren().addAll(title, row1, row2, row3);
+        btnAddStorage.setOnAction(e -> saveStorage());
+        btnEditStorage.setOnAction(e -> editStorage());
+        btnDeleteStorage.setOnAction(e -> deleteStorage());
+        btnClearStorage.setOnAction(e -> clearStorageForm());
+        return form;
+    }
 
-        topContent.getChildren().addAll(titleLabel, createNewButton);
-        topContent.setSpacing(10);
-        topContent.setPadding(new Insets(10));
-
-        // Thay thế TableView Storage bằng Inventory tổng hợp
-        TableView<InventoryRow> inventoryTable = new TableView<>();
-        inventoryTable.setPrefHeight(300);
-        TableColumn<InventoryRow, String> bookIdCol = new TableColumn<>("Book ID");
-        bookIdCol.setCellValueFactory(cellData -> cellData.getValue().bookIdProperty());
-        TableColumn<InventoryRow, String> titleCol = new TableColumn<>("Title");
-        titleCol.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
-        TableColumn<InventoryRow, String> priceCol = new TableColumn<>("Price");
-        priceCol.setCellValueFactory(cellData -> cellData.getValue().priceProperty());
-        TableColumn<InventoryRow, String> soldCol = new TableColumn<>("Sold Quantity");
-        soldCol.setCellValueFactory(cellData -> cellData.getValue().soldQuantityProperty());
-        TableColumn<InventoryRow, String> stockCol = new TableColumn<>("Stock Quantity");
-        stockCol.setCellValueFactory(cellData -> cellData.getValue().stockQuantityProperty());
-        inventoryTable.getColumns().setAll(bookIdCol, titleCol, priceCol, soldCol, stockCol);
-        inventoryTable.setItems(loadInventoryFromMongo());
-
-        // CRUD buttons for Inventory Table
-        Button addInventoryBtn = new Button("Thêm Inventory");
-        Button editInventoryBtn = new Button("Sửa Inventory");
-        Button deleteInventoryBtn = new Button("Xóa Inventory");
-        editInventoryBtn.setDisable(true);
-        deleteInventoryBtn.setDisable(true);
-        HBox inventoryBtnBox = new HBox(10, addInventoryBtn, editInventoryBtn, deleteInventoryBtn);
-        inventoryBtnBox.setPadding(new Insets(0, 0, 10, 0));
-        // Enable/disable edit/delete buttons based on selection
-        inventoryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+    private static TableView<StorageRow> createStorageTable() {
+        tvStorage = new TableView<>();
+        tvStorage.setPrefHeight(350);
+        TableColumn<StorageRow, String> colBookID = new TableColumn<>("Mã sách");
+        colBookID.setCellValueFactory((p) -> {
+            StorageRow s = p.getValue();
+            String id = s.getBookID();
+            return new javafx.beans.property.ReadOnlyObjectWrapper<>(id);
+        });
+        TableColumn<StorageRow, String> colBookName = new TableColumn<>("Tên sách");
+        colBookName.setCellValueFactory((p) -> {
+            StorageRow s = p.getValue();
+            String name = s.getBookName();
+            return new javafx.beans.property.ReadOnlyObjectWrapper<>(name);
+        });
+        TableColumn<StorageRow, Integer> colQuantity = new TableColumn<>("Số lượng nhập");
+        colQuantity.setCellValueFactory((p) -> {
+            StorageRow s = p.getValue();
+            int quantity = s.getQuantity();
+            return new javafx.beans.property.ReadOnlyObjectWrapper<>(quantity);
+        });
+        TableColumn<StorageRow, Integer> colSold = new TableColumn<>("Đã bán");
+        colSold.setCellValueFactory((p) -> {
+            StorageRow s = p.getValue();
+            int sold = s.getSoldQuantity();
+            return new javafx.beans.property.ReadOnlyObjectWrapper<>(sold);
+        });
+        TableColumn<StorageRow, Integer> colStock = new TableColumn<>("Tồn kho");
+        colStock.setCellValueFactory((p) -> {
+            StorageRow s = p.getValue();
+            int stock = s.getStockQuantity();
+            return new javafx.beans.property.ReadOnlyObjectWrapper<>(stock);
+        });
+        tvStorage.getColumns().addAll(colBookID, colBookName, colQuantity, colSold, colStock);
+        tvStorage.setItems(dataStorage);
+        tvStorage.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             boolean selected = newSel != null;
-            editInventoryBtn.setDisable(!selected);
-            deleteInventoryBtn.setDisable(!selected);
+            btnEditStorage.setDisable(!selected);
+            btnDeleteStorage.setDisable(!selected);
+            if (selected) showStorageItem(newSel);
         });
+        return tvStorage;
+    }
 
-        // Thêm chức năng Thêm mới cho Inventory (Book)
-        addInventoryBtn.setOnAction(e -> {
-            // Dialog nhập liệu
-            javafx.scene.control.Dialog<InventoryRow> dialog = new javafx.scene.control.Dialog<>();
-            dialog.setTitle("Thêm Inventory");
-            dialog.setHeaderText("Nhập thông tin Inventory");
-            javafx.scene.control.ButtonType addBtnType = new javafx.scene.control.ButtonType("Thêm", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-            dialog.getDialogPane().getButtonTypes().addAll(addBtnType, javafx.scene.control.ButtonType.CANCEL);
-            VBox vbox = new VBox(10);
-            vbox.setPadding(new Insets(10));
-            javafx.scene.control.TextField bookIdField = new javafx.scene.control.TextField();
-            bookIdField.setPromptText("Book ID");
-            javafx.scene.control.TextField titleField = new javafx.scene.control.TextField();
-            titleField.setPromptText("Title");
-            javafx.scene.control.TextField priceField = new javafx.scene.control.TextField();
-            priceField.setPromptText("Price");
-            javafx.scene.control.TextField quantityField = new javafx.scene.control.TextField();
-            quantityField.setPromptText("Quantity");
-            vbox.getChildren().addAll(
-                new Label("Book ID:"), bookIdField,
-                new Label("Title:"), titleField,
-                new Label("Price:"), priceField,
-                new Label("Quantity:"), quantityField
-            );
-            dialog.getDialogPane().setContent(vbox);
-            dialog.setResultConverter(dialogBtn -> {
-                if (dialogBtn == addBtnType) {
-                    return new InventoryRow(
-                        bookIdField.getText().trim(),
-                        titleField.getText().trim(),
-                        priceField.getText().trim(),
-                        "0", // Default sold quantity
-                        quantityField.getText().trim()
-                    );
-                }
-                return null;
-            });
-            dialog.showAndWait().ifPresent(inventoryRow -> {
-                // Kiểm tra ràng buộc khóa ngoại
-                String bookId = inventoryRow.bookIdProperty().get();
-                try {
-                    MongoDatabase db = MongoDBConnection.getDatabase();
-                    MongoCollection<Document> booksCol = db.getCollection("Books");
-                    Document book = booksCol.find(new Document("bookId", bookId)).first();
-                    if (book == null) {
-                        showError("Book ID không tồn tại!");
-                        return;
-                    }
-                    // Insert vào Books
-                    Document newDoc = new Document("bookId", bookId)
-                        .append("title", inventoryRow.titleProperty().get())
-                        .append("price", Double.parseDouble(inventoryRow.priceProperty().get()))
-                        .append("quantity", Integer.parseInt(inventoryRow.stockQuantityProperty().get()));
-                    booksCol.insertOne(newDoc);
-                    // Reload bảng
-                    inventoryTable.setItems(loadInventoryFromMongo());
-                } catch (Exception ex) {
-                    showError("Lỗi khi thêm Inventory: " + ex.getMessage());
-                }
-            });
-        });
+    private static void loadStorage() {
+        dataStorage.clear();
+        try (Connection conn = MySQLConnection.getConnection()) {
+            String sql = "SELECT bookID, bookName, quantity, soldQuantity, stockQuantity FROM Storages";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                String id = rs.getString("bookID");
+                String name = rs.getString("bookName");
+                int quantity = rs.getInt("quantity");
+                int sold = rs.getInt("soldQuantity");
+                int stock = rs.getInt("stockQuantity");
+                dataStorage.add(new StorageRow(id, name, quantity, sold, stock));
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-        // Xóa toàn bộ phần Order Details (label, bảng, nút CRUD) khỏi layout
-        // Chỉ giữ lại Inventory và các thành phần liên quan
-        VBox tablesSection = new VBox(20);
-        tablesSection.setPadding(new Insets(10));
+    private static void loadBookIDs() {
+        cbBookID.getItems().clear();
+        try (Connection conn = MySQLConnection.getConnection()) {
+            String sql = "SELECT bookID FROM Books";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                cbBookID.getItems().add(rs.getString("bookID"));
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-        Label inventoryLabel = new Label("Inventory:");
-        inventoryLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+    private static void saveStorage() {
+        Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
+        thongbao.setTitle("Lưu kho!!!");
+        try (Connection conn = MySQLConnection.getConnection()) {
+            if (cbBookID.getValue() == null || tfQuantity.getText().isEmpty()) {
+                thongbao.setContentText("Vui lòng nhập đầy đủ thông tin!");
+                thongbao.show();
+                return;
+            }
+            // Lấy tên sách từ bảng Books
+            String sqlBook = "SELECT title FROM Books WHERE bookID = ?";
+            PreparedStatement psBook = conn.prepareStatement(sqlBook);
+            psBook.setString(1, cbBookID.getValue());
+            ResultSet rsBook = psBook.executeQuery();
+            String bookName = null;
+            if (rsBook.next()) {
+                bookName = rsBook.getString("title");
+            } else {
+                thongbao.setContentText("Mã sách không tồn tại, vui lòng thêm ở mục Sản phẩm!");
+                thongbao.show();
+                rsBook.close();
+                psBook.close();
+                return;
+            }
+            rsBook.close();
+            psBook.close();
+            // Thêm vào Storages
+            String sql = "INSERT INTO Storages(bookID, bookName, quantity, soldQuantity, stockQuantity) VALUES (?, ?, ?, 0, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, cbBookID.getValue());
+            ps.setString(2, bookName);
+            int quantity = Integer.parseInt(tfQuantity.getText());
+            ps.setInt(3, quantity);
+            ps.setInt(4, quantity); // stockQuantity ban đầu = quantity
+            int kq = ps.executeUpdate();
+            if (kq > 0) {
+                thongbao.setContentText("Lưu kho thành công!");
+                thongbao.show();
+                loadStorage();
+                clearStorageForm();
+            } else {
+                thongbao.setContentText("Lưu kho thất bại!");
+                thongbao.show();
+            }
+            ps.close();
+        } catch (Exception e) {
+            thongbao.setContentText("Lỗi: " + e.getMessage());
+            thongbao.show();
+        }
+    }
 
-        
+    private static void editStorage() {
+        StorageRow selected = tvStorage.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+        Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
+        thongbao.setTitle("Sửa kho!!!");
+        try (Connection conn = MySQLConnection.getConnection()) {
+            if (tfQuantity.getText().isEmpty()) {
+                thongbao.setContentText("Vui lòng nhập số lượng nhập!");
+                thongbao.show();
+                return;
+            }
+            // Không cập nhật tên sách, chỉ cập nhật quantity
+            String sql = "UPDATE Storages SET quantity=? WHERE bookID=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, Integer.parseInt(tfQuantity.getText()));
+            ps.setString(2, cbBookID.getValue()); // Use cbBookID.getValue()
+            int kq = ps.executeUpdate();
+            if (kq > 0) {
+                thongbao.setContentText("Sửa kho thành công!");
+                thongbao.show();
+                loadStorage();
+                clearStorageForm();
+            } else {
+                thongbao.setContentText("Sửa kho thất bại!");
+                thongbao.show();
+            }
+            ps.close();
+        } catch (Exception e) {
+            thongbao.setContentText("Lỗi: " + e.getMessage());
+            thongbao.show();
+        }
+    }
 
-        tablesSection.getChildren().clear();
-        tablesSection.getChildren().addAll(inventoryLabel, inventoryBtnBox, inventoryTable);
-     
+    private static void deleteStorage() {
+        StorageRow selected = tvStorage.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+        Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
+        thongbao.setTitle("Xóa kho!!!");
+        try (Connection conn = MySQLConnection.getConnection()) {
+            String sql = "DELETE FROM Storages WHERE bookID=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, selected.getBookID());
+            int kq = ps.executeUpdate();
+            if (kq > 0) {
+                thongbao.setContentText("Xóa kho thành công!");
+                thongbao.show();
+                loadStorage();
+                clearStorageForm();
+            } else {
+                thongbao.setContentText("Xóa kho thất bại!");
+                thongbao.show();
+            }
+        } catch (Exception e) {
+            thongbao.setContentText("Lỗi: " + e.getMessage());
+            thongbao.show();
+        }
+    }
 
-        storageContent.setTop(topContent);
-        storageContent.setCenter(tablesSection);
-        return storageContent;
+    private static void clearStorageForm() {
+        cbBookID.setValue(null);
+        tfQuantity.clear();
+        tvStorage.getSelectionModel().clearSelection();
+        btnEditStorage.setDisable(true);
+        btnDeleteStorage.setDisable(true);
+    }
+
+    private static void showStorageItem(StorageRow row) {
+        if (row == null) return;
+        cbBookID.setValue(row.getBookID());
+        tfQuantity.setText(String.valueOf(row.getQuantity()));
+    }
+
+    public static class StorageRow {
+        private final SimpleStringProperty bookID;
+        private final SimpleStringProperty bookName;
+        private final SimpleIntegerProperty quantity;
+        private final SimpleIntegerProperty soldQuantity;
+        private final SimpleIntegerProperty stockQuantity;
+        public StorageRow(String bookID, String bookName, int quantity, int soldQuantity, int stockQuantity) {
+            this.bookID = new SimpleStringProperty(bookID);
+            this.bookName = new SimpleStringProperty(bookName);
+            this.quantity = new SimpleIntegerProperty(quantity);
+            this.soldQuantity = new SimpleIntegerProperty(soldQuantity);
+            this.stockQuantity = new SimpleIntegerProperty(stockQuantity);
+        }
+        public String getBookID() { return bookID.get(); }
+        public String getBookName() { return bookName.get(); }
+        public int getQuantity() { return quantity.get(); }
+        public int getSoldQuantity() { return soldQuantity.get(); }
+        public int getStockQuantity() { return stockQuantity.get(); }
+        public SimpleStringProperty bookIDProperty() { return bookID; }
+        public SimpleStringProperty bookNameProperty() { return bookName; }
+        public SimpleIntegerProperty quantityProperty() { return quantity; }
+        public SimpleIntegerProperty soldQuantityProperty() { return soldQuantity; }
+        public SimpleIntegerProperty stockQuantityProperty() { return stockQuantity; }
     }
 
     public static void main(String[] args) {
         launch(args);
     }
-
-    // Model for Inventory Table (Book)
-    public static class InventoryRow {
-        private SimpleStringProperty bookId, title, price, soldQuantity, stockQuantity;
-        public InventoryRow(String bookId, String title, String price, String soldQuantity, String stockQuantity) {
-            this.bookId = new SimpleStringProperty(bookId);
-            this.title = new SimpleStringProperty(title);
-            this.price = new SimpleStringProperty(price);
-            this.soldQuantity = new SimpleStringProperty(soldQuantity);
-            this.stockQuantity = new SimpleStringProperty(stockQuantity);
-        }
-        public SimpleStringProperty bookIdProperty() { return bookId; }
-        public SimpleStringProperty titleProperty() { return title; }
-        public SimpleStringProperty priceProperty() { return price; }
-        public SimpleStringProperty soldQuantityProperty() { return soldQuantity; }
-        public SimpleStringProperty stockQuantityProperty() { return stockQuantity; }
-    }
-    // Model for Orders Table
-    public static class OrderRow {
-        private SimpleStringProperty orderId, orderDate, totalAmount, status, customerId;
-        public OrderRow(String orderId, String orderDate, String totalAmount, String status, String customerId) {
-            this.orderId = new SimpleStringProperty(orderId);
-            this.orderDate = new SimpleStringProperty(orderDate);
-            this.totalAmount = new SimpleStringProperty(totalAmount);
-            this.status = new SimpleStringProperty(status);
-            this.customerId = new SimpleStringProperty(customerId);
-        }
-        public SimpleStringProperty orderIdProperty() { return orderId; }
-        public SimpleStringProperty orderDateProperty() { return orderDate; }
-        public SimpleStringProperty totalAmountProperty() { return totalAmount; }
-        public SimpleStringProperty statusProperty() { return status; }
-        public SimpleStringProperty customerIdProperty() { return customerId; }
-    }
-    // Load Inventory (Book) from MongoDB
-    private ObservableList<InventoryRow> loadInventoryFromMongo() {
-        ObservableList<InventoryRow> list = FXCollections.observableArrayList();
-        try {
-            MongoDatabase db = MongoDBConnection.getDatabase();
-            MongoCollection<Document> booksCol = db.getCollection("Books");
-            try (MongoCursor<Document> cursor = booksCol.find().iterator()) {
-                while (cursor.hasNext()) {
-                    Document doc = cursor.next();
-                    String bookId = doc.getString("bookId");
-                    String title = doc.containsKey("title") ? doc.getString("title") : "";
-                    String price = doc.containsKey("price") ? doc.get("price").toString() : "";
-                    String quantity = doc.containsKey("quantity") ? doc.get("quantity").toString() : "";
-                    list.add(new InventoryRow(bookId, title, price, "0", quantity)); // Default sold quantity to 0
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error loading inventory from MongoDB: " + e.getMessage());
-        }
-        return list;
-    }
-    // Load Orders from MongoDB
-    private ObservableList<OrderRow> loadOrdersFromMongo() {
-        ObservableList<OrderRow> list = FXCollections.observableArrayList();
-        try {
-            MongoDatabase db = MongoDBConnection.getDatabase();
-            MongoCollection<Document> col = db.getCollection("Orders");
-            try (MongoCursor<Document> cursor = col.find().iterator()) {
-                while (cursor.hasNext()) {
-                    Document doc = cursor.next();
-                    String orderId = doc.getString("orderId");
-                    String orderDate = doc.containsKey("orderDate") ? doc.getString("orderDate") : "";
-                    String totalAmount = doc.containsKey("totalAmount") ? doc.get("totalAmount").toString() : "";
-                    String status = doc.containsKey("status") ? doc.getString("status") : "";
-                    String customerId = doc.containsKey("customerId") ? doc.getString("customerId") : "";
-                    list.add(new OrderRow(orderId, orderDate, totalAmount, status, customerId));
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error loading orders from MongoDB: " + e.getMessage());
-        }
-        return list;
-    }
-
-    private void showError(String message) {
-        javafx.application.Platform.runLater(() -> {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            alert.setTitle("Lỗi");
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
-        });
-    }
 }
+
+
+
+

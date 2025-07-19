@@ -11,10 +11,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tab;
 
@@ -65,7 +66,7 @@ public class Staff extends Application {
         TableColumn<StaffRow, String> positionColumn = new TableColumn<>("Position");
         positionColumn.setCellValueFactory(cellData -> cellData.getValue().positionProperty());
         staffTable.getColumns().setAll(staffIdColumn, emailColumn, passwordColumn, roleColumn, fullNameColumn, addressColumn, phoneNumberColumn, positionColumn);
-        staffTable.setItems(loadStaffFromMongo());
+        staffTable.setItems(loadStaffFromMySQL());
 
         // Customer Table
         TableView<CustomerRow> customerTable = new TableView<>();
@@ -89,7 +90,7 @@ public class Staff extends Application {
         TableColumn<CustomerRow, String> spendingColumn = new TableColumn<>("Spending");
         spendingColumn.setCellValueFactory(cellData -> cellData.getValue().spendingProperty());
         customerTable.getColumns().setAll(customerIdColumn, emailCusColumn, passwordCusColumn, roleCusColumn, fullNameCusColumn, addressCusColumn, phoneNumberCusColumn, rankColumn, spendingColumn);
-        customerTable.setItems(loadCustomersFromMongo());
+        customerTable.setItems(loadCustomersFromMySQL());
 
         // Layout
         VBox staffBox = new VBox(10);
@@ -196,79 +197,83 @@ public class Staff extends Application {
         public javafx.beans.property.SimpleStringProperty spendingProperty() { return spending; }
     }
     // Load Staff from MongoDB
-    private javafx.collections.ObservableList<StaffRow> loadStaffFromMongo() {
+    private javafx.collections.ObservableList<StaffRow> loadStaffFromMySQL() {
         javafx.collections.ObservableList<StaffRow> list = javafx.collections.FXCollections.observableArrayList();
         try {
-            MongoDatabase db = MongoDBConnection.getDatabase();
-            MongoCollection<Document> staffCol = db.getCollection("Staff");
-            try (MongoCursor<Document> cursor = staffCol.find().iterator()) {
-                while (cursor.hasNext()) {
-                    Document doc = cursor.next();
-                    System.out.println("[Staff] " + doc.toJson()); // Log document
-                    String staffId = doc.getString("staffId");
-                    String email = doc.containsKey("email") ? doc.getString("email") : "";
-                    String password = doc.containsKey("password") ? doc.getString("password") : "";
-                    String role = doc.containsKey("role") ? doc.getString("role") : "";
-                    String fullName = doc.containsKey("fullName") ? doc.getString("fullName") : "";
-                    String address = doc.containsKey("address") ? doc.getString("address") : "";
-                    String phoneNumber = doc.containsKey("phoneNumber") ? doc.getString("phoneNumber") : "";
-                    String position = doc.containsKey("position") ? doc.getString("position") : "";
-                    list.add(new StaffRow(staffId, email, password, role, fullName, address, phoneNumber, position));
-                }
+            Connection conn = MySQLConnection.getConnection();
+            String query = "SELECT staffId, email, password, role, fullName, address, phoneNumber, position FROM Staff";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                String staffId = rs.getString("staffId");
+                String email = rs.getString("email");
+                String password = rs.getString("password");
+                String role = rs.getString("role");
+                String fullName = rs.getString("fullName");
+                String address = rs.getString("address");
+                String phoneNumber = rs.getString("phoneNumber");
+                String position = rs.getString("position");
+                list.add(new StaffRow(staffId, email, password, role, fullName, address, phoneNumber, position));
             }
-        } catch (Exception e) {
-            System.out.println("Error loading staff from MongoDB: " + e.getMessage());
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("Error loading staff from MySQL: " + e.getMessage());
         }
         return list;
     }
     // Load Users from MongoDB
-    private javafx.collections.ObservableList<UserRow> loadUsersFromMongo() {
+    private javafx.collections.ObservableList<UserRow> loadUsersFromMySQL() {
         javafx.collections.ObservableList<UserRow> list = javafx.collections.FXCollections.observableArrayList();
         try {
-            MongoDatabase db = MongoDBConnection.getDatabase();
-            MongoCollection<Document> userCol = db.getCollection("Users");
-            try (MongoCursor<Document> cursor = userCol.find().iterator()) {
-                while (cursor.hasNext()) {
-                    Document doc = cursor.next();
-                    String userId = doc.getString("userId");
-                    String email = doc.containsKey("email") ? doc.getString("email") : "";
-                    String password = doc.containsKey("password") ? doc.getString("password") : "";
-                    String role = doc.containsKey("role") ? doc.getString("role") : "";
-                    String fullName = doc.containsKey("fullName") ? doc.getString("fullName") : "";
-                    String address = doc.containsKey("address") ? doc.getString("address") : "";
-                    String phoneNumber = doc.containsKey("phoneNumber") ? doc.getString("phoneNumber") : "";
-                    list.add(new UserRow(userId, email, password, role, fullName, address, phoneNumber));
-                }
+            Connection conn = MySQLConnection.getConnection();
+            String query = "SELECT userId, email, password, role, fullName, address, phoneNumber FROM Users";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                String userId = rs.getString("userId");
+                String email = rs.getString("email");
+                String password = rs.getString("password");
+                String role = rs.getString("role");
+                String fullName = rs.getString("fullName");
+                String address = rs.getString("address");
+                String phoneNumber = rs.getString("phoneNumber");
+                list.add(new UserRow(userId, email, password, role, fullName, address, phoneNumber));
             }
-        } catch (Exception e) {
-            System.out.println("Error loading users from MongoDB: " + e.getMessage());
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("Error loading users from MySQL: " + e.getMessage());
         }
         return list;
     }
     // Load Customers from MongoDB
-    private javafx.collections.ObservableList<CustomerRow> loadCustomersFromMongo() {
+    private javafx.collections.ObservableList<CustomerRow> loadCustomersFromMySQL() {
         javafx.collections.ObservableList<CustomerRow> list = javafx.collections.FXCollections.observableArrayList();
         try {
-            com.mongodb.client.MongoDatabase db = MongoDBConnection.getDatabase();
-            com.mongodb.client.MongoCollection<org.bson.Document> col = db.getCollection("Customers");
-            try (com.mongodb.client.MongoCursor<org.bson.Document> cursor = col.find().iterator()) {
-                while (cursor.hasNext()) {
-                    org.bson.Document doc = cursor.next();
-                    System.out.println("[Customer] " + doc.toJson()); // Log document
-                    String customerId = doc.getString("customerId");
-                    String email = doc.containsKey("email") ? doc.getString("email") : "";
-                    String password = doc.containsKey("password") ? doc.getString("password") : "";
-                    String role = doc.containsKey("role") ? doc.getString("role") : "";
-                    String fullName = doc.containsKey("fullName") ? doc.getString("fullName") : "";
-                    String address = doc.containsKey("address") ? doc.getString("address") : "";
-                    String phoneNumber = doc.containsKey("phoneNumber") ? doc.getString("phoneNumber") : "";
-                    String rank = doc.containsKey("rank") ? doc.getString("rank") : "";
-                    String spending = doc.containsKey("spending") ? doc.get("spending").toString() : "";
-                    list.add(new CustomerRow(customerId, email, password, role, fullName, address, phoneNumber, rank, spending));
-                }
+            Connection conn = MySQLConnection.getConnection();
+            String query = "SELECT customerId, email, password, role, fullName, address, phoneNumber, rank, spending FROM Customers";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                String customerId = rs.getString("customerId");
+                String email = rs.getString("email");
+                String password = rs.getString("password");
+                String role = rs.getString("role");
+                String fullName = rs.getString("fullName");
+                String address = rs.getString("address");
+                String phoneNumber = rs.getString("phoneNumber");
+                String rank = rs.getString("rank");
+                String spending = rs.getString("spending");
+                list.add(new CustomerRow(customerId, email, password, role, fullName, address, phoneNumber, rank, spending));
             }
-        } catch (Exception e) {
-            System.out.println("Error loading customers from MongoDB: " + e.getMessage());
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("Error loading customers from MySQL: " + e.getMessage());
         }
         return list;
     }
