@@ -43,11 +43,13 @@ public class Storage extends Application {
         Label title = new Label("Quản lý kho");
         title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         HBox row1 = new HBox(10);
-        cbBookID = new ComboBox<>(); cbBookID.setPromptText("Mã sách");
+        cbBookID = new ComboBox<>();
+        cbBookID.setPromptText("Mã sách");
         loadBookIDs();
         row1.getChildren().addAll(new Label("Mã sách:"), cbBookID);
         HBox row2 = new HBox(10);
-        tfQuantity = new TextField(); tfQuantity.setPromptText("Số lượng nhập");
+        tfQuantity = new TextField();
+        tfQuantity.setPromptText("Số lượng nhập");
         row2.getChildren().addAll(new Label("Số lượng nhập:"), tfQuantity);
         HBox row3 = new HBox(10);
         btnAddStorage = new Button("Thêm");
@@ -80,12 +82,15 @@ public class Storage extends Application {
             String name = s.getBookName();
             return new javafx.beans.property.ReadOnlyObjectWrapper<>(name);
         });
-        TableColumn<StorageRow, Integer> colQuantity = new TableColumn<>("Số lượng nhập");
-        colQuantity.setCellValueFactory((p) -> {
-            StorageRow s = p.getValue();
-            int quantity = s.getQuantity();
-            return new javafx.beans.property.ReadOnlyObjectWrapper<>(quantity);
-        });
+        /*
+         * TableColumn<StorageRow, Integer> colQuantity = new
+         * TableColumn<>("Số lượng nhập");
+         * colQuantity.setCellValueFactory((p) -> {
+         * StorageRow s = p.getValue();
+         * int quantity = s.getQuantity();
+         * return new javafx.beans.property.ReadOnlyObjectWrapper<>(quantity);
+         * });
+         */
         TableColumn<StorageRow, Integer> colSold = new TableColumn<>("Đã bán");
         colSold.setCellValueFactory((p) -> {
             StorageRow s = p.getValue();
@@ -98,13 +103,14 @@ public class Storage extends Application {
             int stock = s.getStockQuantity();
             return new javafx.beans.property.ReadOnlyObjectWrapper<>(stock);
         });
-        tvStorage.getColumns().addAll(colBookID, colBookName, colQuantity, colSold, colStock);
+        tvStorage.getColumns().addAll(colBookID, colBookName, colSold, colStock);
         tvStorage.setItems(dataStorage);
         tvStorage.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             boolean selected = newSel != null;
             btnEditStorage.setDisable(!selected);
             btnDeleteStorage.setDisable(!selected);
-            if (selected) showStorageItem(newSel);
+            if (selected)
+                showStorageItem(newSel);
         });
         return tvStorage;
     }
@@ -112,16 +118,16 @@ public class Storage extends Application {
     private static void loadStorage() {
         dataStorage.clear();
         try (Connection conn = MySQLConnection.getConnection()) {
-            String sql = "SELECT bookID, bookName, quantity, soldQuantity, stockQuantity FROM Storages";
+            String sql = "SELECT bookID, bookName, soldQuantity, stockQuantity FROM Storages";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 String id = rs.getString("bookID");
                 String name = rs.getString("bookName");
-                int quantity = rs.getInt("quantity");
+                // int quantity = rs.getInt("quantity");
                 int sold = rs.getInt("soldQuantity");
                 int stock = rs.getInt("stockQuantity");
-                dataStorage.add(new StorageRow(id, name, quantity, sold, stock));
+                dataStorage.add(new StorageRow(id, name, sold, stock));
             }
             rs.close();
             stmt.close();
@@ -172,14 +178,13 @@ public class Storage extends Application {
             }
             rsBook.close();
             psBook.close();
-            // Thêm vào Storages
-            String sql = "INSERT INTO Storages(bookID, bookName, quantity, soldQuantity, stockQuantity) VALUES (?, ?, ?, 0, ?)";
+            // Thêm vào Storages (bỏ quantity, chỉ còn soldQuantity và stockQuantity)
+            String sql = "INSERT INTO Storages(bookID, bookName, soldQuantity, stockQuantity) VALUES (?, ?, 0, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, cbBookID.getValue());
             ps.setString(2, bookName);
-            int quantity = Integer.parseInt(tfQuantity.getText());
-            ps.setInt(3, quantity);
-            ps.setInt(4, quantity); // stockQuantity ban đầu = quantity
+            int stockQuantity = Integer.parseInt(tfQuantity.getText());
+            ps.setInt(3, stockQuantity); // stockQuantity ban đầu = số lượng nhập
             int kq = ps.executeUpdate();
             if (kq > 0) {
                 thongbao.setContentText("Lưu kho thành công!");
@@ -199,7 +204,8 @@ public class Storage extends Application {
 
     private static void editStorage() {
         StorageRow selected = tvStorage.getSelectionModel().getSelectedItem();
-        if (selected == null) return;
+        if (selected == null)
+            return;
         Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
         thongbao.setTitle("Sửa kho!!!");
         try (Connection conn = MySQLConnection.getConnection()) {
@@ -208,11 +214,11 @@ public class Storage extends Application {
                 thongbao.show();
                 return;
             }
-            // Không cập nhật tên sách, chỉ cập nhật quantity
-            String sql = "UPDATE Storages SET quantity=? WHERE bookID=?";
+            // Không cập nhật tên sách, chỉ cập nhật stockQuantity
+            String sql = "UPDATE Storages SET stockQuantity=? WHERE bookID=?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, Integer.parseInt(tfQuantity.getText()));
-            ps.setString(2, cbBookID.getValue()); // Use cbBookID.getValue()
+            ps.setString(2, cbBookID.getValue());
             int kq = ps.executeUpdate();
             if (kq > 0) {
                 thongbao.setContentText("Sửa kho thành công!");
@@ -232,7 +238,8 @@ public class Storage extends Application {
 
     private static void deleteStorage() {
         StorageRow selected = tvStorage.getSelectionModel().getSelectedItem();
-        if (selected == null) return;
+        if (selected == null)
+            return;
         Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
         thongbao.setTitle("Xóa kho!!!");
         try (Connection conn = MySQLConnection.getConnection()) {
@@ -264,7 +271,8 @@ public class Storage extends Application {
     }
 
     private static void showStorageItem(StorageRow row) {
-        if (row == null) return;
+        if (row == null)
+            return;
         cbBookID.setValue(row.getBookID());
         tfQuantity.setText(String.valueOf(row.getQuantity()));
     }
@@ -272,33 +280,50 @@ public class Storage extends Application {
     public static class StorageRow {
         private final SimpleStringProperty bookID;
         private final SimpleStringProperty bookName;
-        private final SimpleIntegerProperty quantity;
         private final SimpleIntegerProperty soldQuantity;
         private final SimpleIntegerProperty stockQuantity;
-        public StorageRow(String bookID, String bookName, int quantity, int soldQuantity, int stockQuantity) {
+
+        public StorageRow(String bookID, String bookName, int soldQuantity, int stockQuantity) {
             this.bookID = new SimpleStringProperty(bookID);
             this.bookName = new SimpleStringProperty(bookName);
-            this.quantity = new SimpleIntegerProperty(quantity);
             this.soldQuantity = new SimpleIntegerProperty(soldQuantity);
             this.stockQuantity = new SimpleIntegerProperty(stockQuantity);
         }
-        public String getBookID() { return bookID.get(); }
-        public String getBookName() { return bookName.get(); }
-        public int getQuantity() { return quantity.get(); }
-        public int getSoldQuantity() { return soldQuantity.get(); }
-        public int getStockQuantity() { return stockQuantity.get(); }
-        public SimpleStringProperty bookIDProperty() { return bookID; }
-        public SimpleStringProperty bookNameProperty() { return bookName; }
-        public SimpleIntegerProperty quantityProperty() { return quantity; }
-        public SimpleIntegerProperty soldQuantityProperty() { return soldQuantity; }
-        public SimpleIntegerProperty stockQuantityProperty() { return stockQuantity; }
+
+        public String getBookID() {
+            return bookID.get();
+        }
+
+        public String getBookName() {
+            return bookName.get();
+        }
+
+        public int getSoldQuantity() {
+            return soldQuantity.get();
+        }
+
+        public int getStockQuantity() {
+            return stockQuantity.get();
+        }
+
+        public SimpleStringProperty bookIDProperty() {
+            return bookID;
+        }
+
+        public SimpleStringProperty bookNameProperty() {
+            return bookName;
+        }
+
+        public SimpleIntegerProperty soldQuantityProperty() {
+            return soldQuantity;
+        }
+
+        public SimpleIntegerProperty stockQuantityProperty() {
+            return stockQuantity;
+        }
     }
 
     public static void main(String[] args) {
         launch(args);
     }
 }
-
-
-
-
