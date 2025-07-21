@@ -80,16 +80,6 @@ public class DashboardStats {
         public double getTotal() { return total; }
     }
 
-    public static class MySQLConnection {
-        private static final String URL = "jdbc:mysql://localhost:3306/BookStoreDB";
-        private static final String USER = "your_username";
-        private static final String PASSWORD = "your_password";
-
-        public static Connection getConnection() throws SQLException {
-            return DriverManager.getConnection(URL, USER, PASSWORD);
-        }
-    }
-
     public static VBox createDashboardContent() {
         // Revenue by month
         Map<String, Double> monthlyRevenue = new java.util.LinkedHashMap<>();
@@ -136,14 +126,14 @@ public class DashboardStats {
 
             // Top 5 Customers
             List<CustomerStat> customerStatList = new ArrayList<>();
-            String customerQuery = "SELECT customerId, rankC AS rank, spending FROM Customers WHERE customerId IS NOT NULL";
+            String customerQuery = "SELECT customerId, rankC AS customerRank, spending FROM Customers WHERE customerId IS NOT NULL";
             try (PreparedStatement stmt = conn.prepareStatement(customerQuery);
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     String customerId = rs.getString("customerId");
-                    String rankC = rs.getString("rank") != null ? rs.getString("rank") : "";
+                    String rank = rs.getString("CustomerRank") != null ? rs.getString("CustomerRank") : "";
                     double spending = rs.getDouble("spending");
-                    customerStatList.add(new CustomerStat(customerId, rankC, spending));
+                    customerStatList.add(new CustomerStat(customerId, rank, spending));
                 }
             }
             customerStatList.sort((a, b) -> Double.compare(b.spending, a.spending));
