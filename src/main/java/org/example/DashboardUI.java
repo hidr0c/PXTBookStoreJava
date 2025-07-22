@@ -35,7 +35,7 @@ public class DashboardUI extends Application {
         Button dashboardButton = createNavButton("Dashboard");
         Button storageButton = createNavButton("Quản lý kho");
         Button productButton = createNavButton("Quản lý sản phẩm");
-        Button staffButton = createNavButton("Quản lý user");
+        Button staffButton = createNavButton("Quản lý nhân viên");
         Button ordersButton = createNavButton("Quản lý hóa đơn");
 
         Button[] buttons = { dashboardButton, storageButton, productButton, staffButton, ordersButton };
@@ -83,13 +83,11 @@ public class DashboardUI extends Application {
         Label welcomeLabel = new Label("Welcome to the Book Store Management System");
         welcomeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-        // XÓA hoặc COMMENT tất cả các dòng liên quan đến DashboardStats (import, gọi hàm, biến, ...)
-        // VBox dashboardStatsContent = DashboardStats.createDashboardContent();
+        VBox dashboardStatsContent = DashboardStats.createDashboardContent();
 
         dashboardContent.getChildren().addAll(
-                welcomeLabel
-                // đã xóa dashboardStatsContent
-        );
+                welcomeLabel,
+                dashboardStatsContent);
 
         // Wrap the dashboardContent VBox in a ScrollPane
         ScrollPane scrollPane = new ScrollPane(dashboardContent);
@@ -100,13 +98,21 @@ public class DashboardUI extends Application {
 
     private void showStorageUI() {
         contentArea.getChildren().clear();
-        BorderPane storageContent = Storage.createStorageContent();
+
+        // Create storage content using the Storage class
+        Storage storage = new Storage();
+        BorderPane storageContent = storage.createStorageContent();
+
         contentArea.getChildren().add(storageContent);
     }
 
     private void showProductsUI() {
         contentArea.getChildren().clear();
-        BorderPane productContent = Product.createProductContent();
+
+        // Create product content using the Product class
+        Product product = new Product();
+        BorderPane productContent = product.createProductContent();
+
         contentArea.getChildren().add(productContent);
     }
 
@@ -114,11 +120,16 @@ public class DashboardUI extends Application {
         contentArea.getChildren().clear();
         BorderPane userContent = UserUI.createUserContent();
         contentArea.getChildren().add(userContent);
+
     }
 
     private void showOrdersUI() {
         contentArea.getChildren().clear();
-        BorderPane orderContent = Order.createOrderContent();
+
+        // Create order content using the Order class
+        Order order = new Order();
+        BorderPane orderContent = order.createOrderContent();
+
         contentArea.getChildren().add(orderContent);
     }
 
