@@ -9,7 +9,7 @@ public class MySQLConnection {
         try {
             String url = "jdbc:mysql://localhost:3306/BookStoreDB";
             String user = "root";
-            String pass = "2004Ph@nxuanthai";
+            String pass = "root123";
             conn = DriverManager.getConnection(url, user, pass);
         } catch (Exception ex) {
             System.out.println("Kết nối thất bại: " + ex.getMessage());

@@ -1,18 +1,32 @@
 package org.example;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.sql.*;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleFloatProperty;
 
 public class Order extends Application {
     private String orderID;
@@ -46,7 +60,7 @@ public class Order extends Application {
     static TextField tfOrderID, tfOrderDate, tfTotal, tfStatus;
     static TableView<Order> tvOrder;
     static ObservableList<Order> dataOrder = FXCollections.observableArrayList();
-    static Button btnAddOrder, btnEditOrder, btnDeleteOrder, btnClearOrder;
+    static Button btnAddOrder, btnEditOrder, btnClearOrder;
 
     private static TableView<OrderDetailRow> tvOrderDetail;
     private static ObservableList<OrderDetailRow> dataOrderDetail = FXCollections.observableArrayList();
@@ -70,7 +84,7 @@ public class Order extends Application {
     public static VBox createOrderForm() {
         VBox form = new VBox(10);
         form.setPadding(new Insets(10));
-        Label title = new Label("Quản lý hóa đơn");
+        Label title = new Label("Quản lý hóa đơn111111");
         title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         HBox row1 = new HBox(10);
         tfOrderID = new TextField(); tfOrderID.setPromptText("Order ID");
@@ -86,9 +100,8 @@ public class Order extends Application {
         HBox row3 = new HBox(10);
         btnAddOrder = new Button("Thêm");
         btnEditOrder = new Button("Sửa");
-        btnDeleteOrder = new Button("Xóa");
         btnClearOrder = new Button("Xóa tất cả");
-        row3.getChildren().addAll(btnAddOrder, btnEditOrder, btnDeleteOrder, btnClearOrder);
+        row3.getChildren().addAll(btnAddOrder, btnEditOrder, btnClearOrder);
         form.getChildren().addAll(title, row1, row2, row3);
         // Load dữ liệu cho ComboBox
         loadCustomerIDs();
@@ -247,24 +260,69 @@ public class Order extends Application {
     private static void editOrder() {
         try {
             Connection conn = MySQLConnection.getConnection();
-            String sql = "UPDATE Orders SET orderDate=?, total=?, status=?, customerID=?, staffID=? WHERE orderID=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, tfOrderDate.getText());
-            ps.setFloat(2, Float.parseFloat(tfTotal.getText()));
-            ps.setString(3, cbStatus.getValue());
-            ps.setString(4, cbCustomerID.getValue());
-            ps.setString(5, cbStaffID.getValue());
-            ps.setString(6, tfOrderID.getText());
-            int kq = ps.executeUpdate();
-            if (kq > 0) {
-                Alert a = new Alert(Alert.AlertType.INFORMATION);
+
+            // Lấy thông tin hiện tại
+            String orderID = tfOrderID.getText();
+            String status = cbStatus.getValue();
+            String customerID = cbCustomerID.getValue();
+            String staffID = cbStaffID.getValue();
+            String bookID = cbBookID.getValue();
+            int quantity = Integer.parseInt(tfQuantity.getText());
+
+            // Lấy đơn giá sách
+            float unitPrice = 0;
+            String sqlBook = "SELECT price FROM Books WHERE bookID = ?";
+            PreparedStatement psBook = conn.prepareStatement(sqlBook);
+            psBook.setString(1, bookID);
+            ResultSet rsBook = psBook.executeQuery();
+            if (rsBook.next()) {
+                unitPrice = rsBook.getFloat("price");
+            }
+            rsBook.close();
+            psBook.close();
+
+            float total = unitPrice * quantity;
+
+            // Lấy thời gian hiện tại
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String currentDateTime = now.format(formatter);
+
+            // Update Orders
+            String sqlOrder = "UPDATE Orders SET orderDate=?, total=?, status=?, customerID=?, staffID=? WHERE orderID=?";
+            PreparedStatement psOrder = conn.prepareStatement(sqlOrder);
+            psOrder.setString(1, currentDateTime);
+            psOrder.setFloat(2, total);
+            psOrder.setString(3, status);
+            psOrder.setString(4, customerID);
+            psOrder.setString(5, staffID);
+            psOrder.setString(6, orderID);
+            int kqOrder = psOrder.executeUpdate();
+
+            // Update OrderDetails
+            String sqlDetail = "UPDATE OrderDetails SET quantity=?, unitPrice=? WHERE orderID=? AND bookID=?";
+            PreparedStatement psDetail = conn.prepareStatement(sqlDetail);
+            psDetail.setInt(1, quantity);
+            psDetail.setFloat(2, unitPrice);
+            psDetail.setString(3, orderID);
+            psDetail.setString(4, bookID);
+            int kqDetail = psDetail.executeUpdate();
+
+            Alert a = new Alert(Alert.AlertType.INFORMATION);
+            if (kqOrder > 0 && kqDetail > 0) {
                 a.setContentText("Sửa đơn hàng thành công!");
                 a.show();
                 dataOrder.clear();
                 loadOrder();
+                loadOrderDetail();
+            } else {
+                a.setContentText("Không có đơn hàng nào được cập nhật! Kiểm tra lại Order ID và Book ID.");
+                a.show();
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            Alert a = new Alert(Alert.AlertType.ERROR, "Có lỗi xảy ra khi sửa đơn hàng: " + ex.getMessage());
+            a.show();
         }
     }
 
@@ -303,7 +361,6 @@ public class Order extends Application {
         vbox.getChildren().addAll(createOrderForm(), showTableOrder(), createOrderDetailTable());
         borderpane.setCenter(vbox);
         btnAddOrder.setOnAction(e -> saveOrder());
-        btnDeleteOrder.setOnAction(e -> deleteOrder());
         btnEditOrder.setOnAction(e -> editOrder());
         btnClearOrder.setOnAction(e -> clearOrderForm());
         tvOrder.setOnMouseClicked(e -> showOrderItem());

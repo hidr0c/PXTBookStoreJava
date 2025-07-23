@@ -1,5 +1,10 @@
 package org.example;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -9,15 +14,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.Tab;
 
 public class Staff extends Application {
     
@@ -67,54 +64,15 @@ public class Staff extends Application {
         positionColumn.setCellValueFactory(cellData -> cellData.getValue().positionProperty());
         staffTable.getColumns().setAll(staffIdColumn, emailColumn, passwordColumn, roleColumn, fullNameColumn, addressColumn, phoneNumberColumn, positionColumn);
         staffTable.setItems(loadStaffFromMySQL());
-
-        // Customer Table
-        TableView<CustomerRow> customerTable = new TableView<>();
-        customerTable.setPrefHeight(250);
-        TableColumn<CustomerRow, String> customerIdColumn = new TableColumn<>("Customer ID");
-        customerIdColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty());
-        TableColumn<CustomerRow, String> emailCusColumn = new TableColumn<>("Email");
-        emailCusColumn.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
-        TableColumn<CustomerRow, String> passwordCusColumn = new TableColumn<>("Password");
-        passwordCusColumn.setCellValueFactory(cellData -> cellData.getValue().passwordProperty());
-        TableColumn<CustomerRow, String> roleCusColumn = new TableColumn<>("Role");
-        roleCusColumn.setCellValueFactory(cellData -> cellData.getValue().roleProperty());
-        TableColumn<CustomerRow, String> fullNameCusColumn = new TableColumn<>("Full Name");
-        fullNameCusColumn.setCellValueFactory(cellData -> cellData.getValue().fullNameProperty());
-        TableColumn<CustomerRow, String> addressCusColumn = new TableColumn<>("Address");
-        addressCusColumn.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
-        TableColumn<CustomerRow, String> phoneNumberCusColumn = new TableColumn<>("Phone Number");
-        phoneNumberCusColumn.setCellValueFactory(cellData -> cellData.getValue().phoneNumberProperty());
-        TableColumn<CustomerRow, String> rankColumn = new TableColumn<>("Rank");
-        rankColumn.setCellValueFactory(cellData -> cellData.getValue().rankProperty());
-        TableColumn<CustomerRow, String> spendingColumn = new TableColumn<>("Spending");
-        spendingColumn.setCellValueFactory(cellData -> cellData.getValue().spendingProperty());
-        customerTable.getColumns().setAll(customerIdColumn, emailCusColumn, passwordCusColumn, roleCusColumn, fullNameCusColumn, addressCusColumn, phoneNumberCusColumn, rankColumn, spendingColumn);
-        customerTable.setItems(loadCustomersFromMySQL());
-
-        // Layout
         VBox staffBox = new VBox(10);
         staffBox.setPadding(new Insets(10));
         Label staffLabel = new Label("Staffs");
         staffLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         staffBox.getChildren().addAll(staffLabel, staffTable);
-
-        VBox customerBox = new VBox(10);
-        customerBox.setPadding(new Insets(10));
-        Label customerLabel = new Label("Customers");
-        customerLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        customerBox.getChildren().addAll(customerLabel, customerTable);
-
-        TabPane tabPane = new TabPane();
-        Tab staffTab = new Tab("Staff");
-        staffTab.setContent(staffBox);
-        Tab customerTab = new Tab("Customer");
-        customerTab.setContent(customerBox);
-        tabPane.getTabs().addAll(staffTab, customerTab);
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        staffContent.setTop(topContent);
-        staffContent.setCenter(tabPane);
-        return staffContent;
+        BorderPane content = new BorderPane();
+        content.setTop(topContent);
+        content.setCenter(staffBox);
+        return content;
     }
 
     // Model for Staff Table
@@ -174,8 +132,8 @@ public class Staff extends Application {
     }
     // Model for Customers Table
     public static class CustomerRow {
-        private javafx.beans.property.SimpleStringProperty customerId, email, password, role, fullName, address, phoneNumber, rank, spending;
-        public CustomerRow(String customerId, String email, String password, String role, String fullName, String address, String phoneNumber, String rank, String spending) {
+        private javafx.beans.property.SimpleStringProperty customerId, email, password, role, fullName, address, phoneNumber, spending;
+        public CustomerRow(String customerId, String email, String password, String role, String fullName, String address, String phoneNumber, String spending) {
             this.customerId = new javafx.beans.property.SimpleStringProperty(customerId);
             this.email = new javafx.beans.property.SimpleStringProperty(email);
             this.password = new javafx.beans.property.SimpleStringProperty(password);
@@ -183,7 +141,6 @@ public class Staff extends Application {
             this.fullName = new javafx.beans.property.SimpleStringProperty(fullName);
             this.address = new javafx.beans.property.SimpleStringProperty(address);
             this.phoneNumber = new javafx.beans.property.SimpleStringProperty(phoneNumber);
-            this.rank = new javafx.beans.property.SimpleStringProperty(rank);
             this.spending = new javafx.beans.property.SimpleStringProperty(spending);
         }
         public javafx.beans.property.SimpleStringProperty customerIdProperty() { return customerId; }
@@ -193,7 +150,6 @@ public class Staff extends Application {
         public javafx.beans.property.SimpleStringProperty fullNameProperty() { return fullName; }
         public javafx.beans.property.SimpleStringProperty addressProperty() { return address; }
         public javafx.beans.property.SimpleStringProperty phoneNumberProperty() { return phoneNumber; }
-        public javafx.beans.property.SimpleStringProperty rankProperty() { return rank; }
         public javafx.beans.property.SimpleStringProperty spendingProperty() { return spending; }
     }
     // Load Staff from MongoDB
@@ -254,7 +210,7 @@ public class Staff extends Application {
         javafx.collections.ObservableList<CustomerRow> list = javafx.collections.FXCollections.observableArrayList();
         try {
             Connection conn = MySQLConnection.getConnection();
-            String query = "SELECT customerId, email, password, role, fullName, address, phoneNumber, rank, spending FROM Customers";
+            String query = "SELECT customerId, email, password, role, fullName, address, phoneNumber, spending FROM Customers";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
@@ -265,9 +221,8 @@ public class Staff extends Application {
                 String fullName = rs.getString("fullName");
                 String address = rs.getString("address");
                 String phoneNumber = rs.getString("phoneNumber");
-                String rank = rs.getString("rank");
                 String spending = rs.getString("spending");
-                list.add(new CustomerRow(customerId, email, password, role, fullName, address, phoneNumber, rank, spending));
+                list.add(new CustomerRow(customerId, email, password, role, fullName, address, phoneNumber, spending));
             }
             rs.close();
             stmt.close();

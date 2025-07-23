@@ -1,13 +1,26 @@
 package org.example;
 
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.SimpleFloatProperty;
-import java.sql.*;
+import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 public class UserUI {
     // Staff
@@ -20,8 +33,6 @@ public class UserUI {
     private static TableView<CustomerRow> tvCustomer;
     private static ObservableList<CustomerRow> dataCustomer = FXCollections.observableArrayList();
     private static TextField tfCustomerID;
-    private static ComboBox<String> cbRank;
-    private static TextField tfSpending;
     private static Button btnAddCustomer, btnEditCustomer, btnDeleteCustomer, btnClearCustomer;
 
     public static BorderPane createUserContent() {
@@ -39,7 +50,7 @@ public class UserUI {
     private static VBox createStaffSection() {
         VBox section = new VBox(10);
         section.setPadding(new Insets(10));
-        Label title = new Label("Quản lý nhân viên (Staff)");
+        Label title = new Label("Quản lý nhân 2 (Staff)");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         HBox row1 = new HBox(10);
         tfStaffID = new TextField(); tfStaffID.setPromptText("Mã nhân viên");
@@ -249,10 +260,7 @@ public class UserUI {
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         HBox row1 = new HBox(10);
         tfCustomerID = new TextField(); tfCustomerID.setPromptText("Mã khách hàng");
-        cbRank = new ComboBox<>(); cbRank.setPromptText("Hạng");
-        cbRank.getItems().addAll("Bronze", "Silver", "Gold", "Platinum");
-        tfSpending = new TextField(); tfSpending.setPromptText("Chi tiêu");
-        row1.getChildren().addAll(new Label("Mã KH:"), tfCustomerID, new Label("Hạng:"), cbRank, new Label("Chi tiêu:"), tfSpending);
+        row1.getChildren().addAll(new Label("Mã KH:"), tfCustomerID);
         HBox row2 = new HBox(10);
         btnAddCustomer = new Button("Thêm");
         btnEditCustomer = new Button("Sửa");
@@ -280,14 +288,12 @@ public class UserUI {
         TableColumn<CustomerRow, String> colRank = new TableColumn<>("Hạng");
         colRank.setCellValueFactory((p) -> {
             CustomerRow c = p.getValue();
-            String rank = c.getRank();
-            return new javafx.beans.property.ReadOnlyObjectWrapper<>(rank);
+            return new javafx.beans.property.ReadOnlyObjectWrapper<>(c.getRank());
         });
         TableColumn<CustomerRow, Float> colSpending = new TableColumn<>("Chi tiêu");
         colSpending.setCellValueFactory((p) -> {
             CustomerRow c = p.getValue();
-            float spending = c.getSpending();
-            return new javafx.beans.property.ReadOnlyObjectWrapper<>(spending);
+            return new javafx.beans.property.ReadOnlyObjectWrapper<>(c.getSpending());
         });
         tvCustomer.getColumns().addAll(colCustomerID, colRank, colSpending);
         tvCustomer.setItems(dataCustomer);
@@ -321,12 +327,11 @@ public class UserUI {
         Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
         thongbao.setTitle("Lưu khách hàng!!!");
         try (Connection conn = MySQLConnection.getConnection()) {
-            if (tfCustomerID.getText().isEmpty() || cbRank.getValue() == null || tfSpending.getText().isEmpty()) {
+            if (tfCustomerID.getText().isEmpty()) {
                 thongbao.setContentText("Vui lòng nhập đầy đủ thông tin!");
                 thongbao.show();
                 return;
             }
-            
             // Kiểm tra xem user đã tồn tại trong Users chưa
             String checkSql = "SELECT COUNT(*) FROM Users WHERE userID = ?";
             PreparedStatement checkPs = conn.prepareStatement(checkSql);
@@ -334,7 +339,6 @@ public class UserUI {
             ResultSet rs = checkPs.executeQuery();
             rs.next();
             int count = rs.getInt(1);
-            
             if (count == 0) {
                 // Nếu user chưa có trong Users, thêm vào trước
                 String insertUserSql = "INSERT INTO Users(userID, fullName, address, phoneNumber) VALUES (?, ?, '', '')";
@@ -344,13 +348,10 @@ public class UserUI {
                 userPs.executeUpdate();
                 userPs.close();
             }
-            
-            // Sau đó thêm vào Customers
-            String sql = "INSERT INTO Customers(customerID, rankC, spending) VALUES (?, ?, ?)";
+            // Sau đó thêm vào Customers với rankC='Bronze', spending=0
+            String sql = "INSERT INTO Customers(customerID, rankC, spending) VALUES (?, 'Bronze', 0)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, tfCustomerID.getText());
-            ps.setString(2, cbRank.getValue());
-            ps.setFloat(3, Float.parseFloat(tfSpending.getText()));
             int kq = ps.executeUpdate();
             if (kq > 0) {
                 thongbao.setContentText("Lưu khách hàng thành công!");
@@ -361,7 +362,6 @@ public class UserUI {
                 thongbao.setContentText("Lưu khách hàng thất bại!");
                 thongbao.show();
             }
-            
             checkPs.close();
             rs.close();
         } catch (Exception e) {
@@ -375,19 +375,13 @@ public class UserUI {
         Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
         thongbao.setTitle("Sửa khách hàng!!!");
         try (Connection conn = MySQLConnection.getConnection()) {
-            if (cbRank.getValue() == null) {
-                thongbao.setContentText("Vui lòng chọn hạng!");
-                thongbao.show();
-                return;
-            }
-            String sql = "UPDATE Customers SET rankC=?, spending=? WHERE customerID=?";
+            String sql = "UPDATE Customers SET customerID=? WHERE customerID=?";
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, cbRank.getValue());
-            ps.setFloat(2, Float.parseFloat(tfSpending.getText()));
-            ps.setString(3, selected.getCustomerID()); // Sử dụng customerID từ row được chọn
+            ps.setString(1, tfCustomerID.getText());
+            ps.setString(2, selected.getCustomerID()); // Sử dụng customerID từ row được chọn
             int kq = ps.executeUpdate();
             if (kq > 0) {
-                thongbao.setContentText("Sửa khách hàng thành công! CustomerID: " + selected.getCustomerID() + ", Rank: " + cbRank.getValue() + ", Spending: " + tfSpending.getText());
+                thongbao.setContentText("Sửa khách hàng thành công! CustomerID: " + selected.getCustomerID() + " -> " + tfCustomerID.getText());
                 thongbao.show();
                 // Force refresh TableView - sử dụng Platform.runLater để đảm bảo chạy trên JavaFX thread
                 javafx.application.Platform.runLater(() -> {
@@ -431,8 +425,6 @@ public class UserUI {
     }
     private static void clearCustomerForm() {
         tfCustomerID.clear();
-        cbRank.setValue(null);
-        tfSpending.clear();
         tvCustomer.getSelectionModel().clearSelection();
         btnEditCustomer.setDisable(true);
         btnDeleteCustomer.setDisable(true);
@@ -440,8 +432,6 @@ public class UserUI {
     private static void showCustomerItem(CustomerRow row) {
         if (row == null) return;
         tfCustomerID.setText(row.getCustomerID());
-        cbRank.setValue(row.getRank());
-        tfSpending.setText(String.valueOf(row.getSpending()));
     }
     public static class CustomerRow {
         private final SimpleStringProperty customerID;

@@ -120,7 +120,6 @@ public class DashboardUI extends Application {
         contentArea.getChildren().clear();
         BorderPane userContent = UserUI.createUserContent();
         contentArea.getChildren().add(userContent);
-
     }
 
     private void showOrdersUI() {
