@@ -49,12 +49,29 @@ public class Order extends Application {
         // Constructor mặc định để dùng cho JavaFX Application
     }
 
-    public String getOrderID() { return orderID; }
-    public String getOrderDate() { return orderDate; }
-    public float getTotal() { return total; }
-    public String getStatus() { return status; }
-    public String getCustomerID() { return customerID; }
-    public String getStaffID() { return staffID; }
+    public String getOrderID() {
+        return orderID;
+    }
+
+    public String getOrderDate() {
+        return orderDate;
+    }
+
+    public float getTotal() {
+        return total;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getCustomerID() {
+        return customerID;
+    }
+
+    public String getStaffID() {
+        return staffID;
+    }
 
     // --- CRUD UI & Logic ---
     static TextField tfOrderID, tfOrderDate, tfTotal, tfStatus;
@@ -84,19 +101,26 @@ public class Order extends Application {
     public static VBox createOrderForm() {
         VBox form = new VBox(10);
         form.setPadding(new Insets(10));
-        Label title = new Label("Quản lý hóa đơn111111");
+        Label title = new Label("Quản lý hóa đơn");
         title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         HBox row1 = new HBox(10);
-        tfOrderID = new TextField(); tfOrderID.setPromptText("Order ID");
-        cbBookID = new ComboBox<>(); cbBookID.setPromptText("Book ID");
+        tfOrderID = new TextField();
+        tfOrderID.setPromptText("Order ID");
+        cbBookID = new ComboBox<>();
+        cbBookID.setPromptText("Book ID");
         row1.getChildren().addAll(new Label("Order ID:"), tfOrderID, new Label("Book ID:"), cbBookID);
         HBox row2 = new HBox(10);
-        cbStatus = new ComboBox<>(); cbStatus.setPromptText("Status");
+        cbStatus = new ComboBox<>();
+        cbStatus.setPromptText("Status");
         cbStatus.getItems().addAll("Pending", "Processing", "Completed", "Cancelled");
-        cbCustomerID = new ComboBox<>(); cbCustomerID.setPromptText("Customer ID");
-        cbStaffID = new ComboBox<>(); cbStaffID.setPromptText("Staff ID");
-        tfQuantity = new TextField(); tfQuantity.setPromptText("Quantity");
-        row2.getChildren().addAll(new Label("Status:"), cbStatus, new Label("Customer ID:"), cbCustomerID, new Label("Staff ID:"), cbStaffID, new Label("Quantity:"), tfQuantity);
+        cbCustomerID = new ComboBox<>();
+        cbCustomerID.setPromptText("Customer ID");
+        cbStaffID = new ComboBox<>();
+        cbStaffID.setPromptText("Staff ID");
+        tfQuantity = new TextField();
+        tfQuantity.setPromptText("Quantity");
+        row2.getChildren().addAll(new Label("Status:"), cbStatus, new Label("Customer ID:"), cbCustomerID,
+                new Label("Staff ID:"), cbStaffID, new Label("Quantity:"), tfQuantity);
         HBox row3 = new HBox(10);
         btnAddOrder = new Button("Thêm");
         btnEditOrder = new Button("Sửa");
@@ -171,13 +195,12 @@ public class Order extends Application {
             ResultSet rs = stm.executeQuery(sql);
             while (rs.next()) {
                 dataOrder.add(new Order(
-                    rs.getString("orderID"),
-                    rs.getString("orderDate"),
-                    rs.getFloat("total"),
-                    rs.getString("status"),
-                    rs.getString("customerID"),
-                    rs.getString("staffID")
-                ));
+                        rs.getString("orderID"),
+                        rs.getString("orderDate"),
+                        rs.getFloat("total"),
+                        rs.getString("status"),
+                        rs.getString("customerID"),
+                        rs.getString("staffID")));
             }
             tvOrder.setItems(dataOrder);
         } catch (Exception e) {
@@ -192,7 +215,8 @@ public class Order extends Application {
             cbStatus.setValue(order.getStatus());
             cbCustomerID.setValue(order.getCustomerID());
             cbStaffID.setValue(order.getStaffID());
-            // Không set cbBookID và tfQuantity vì mỗi đơn có thể có nhiều chi tiết, chỉ set khi cần
+            // Không set cbBookID và tfQuantity vì mỗi đơn có thể có nhiều chi tiết, chỉ set
+            // khi cần
         }
     }
 
@@ -202,7 +226,9 @@ public class Order extends Application {
         try {
             Connection conn = MySQLConnection.getConnection();
             if (conn != null) {
-                if (tfOrderID.getText().isEmpty() || cbStatus.getValue() == null || cbCustomerID.getValue() == null || cbStaffID.getValue() == null || cbBookID.getValue() == null || tfQuantity.getText().isEmpty()) {
+                if (tfOrderID.getText().isEmpty() || cbStatus.getValue() == null || cbCustomerID.getValue() == null
+                        || cbStaffID.getValue() == null || cbBookID.getValue() == null
+                        || tfQuantity.getText().isEmpty()) {
                     thongbao.setContentText("Vui lòng nhập đầy đủ thông tin!");
                     thongbao.show();
                     return;
@@ -221,7 +247,8 @@ public class Order extends Application {
                 psBook.close();
                 float total = unitPrice * quantity;
                 java.time.LocalDateTime now = java.time.LocalDateTime.now();
-                java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                        .ofPattern("yyyy-MM-dd HH:mm:ss");
                 String currentDateTime = now.format(formatter);
                 // Lưu vào Orders
                 String sqlOrder = "INSERT INTO Orders(orderID, orderDate, total, status, customerID, staffID) VALUES (?, ?, ?, ?, ?, ?)";
@@ -285,7 +312,8 @@ public class Order extends Application {
 
             // Lấy thời gian hiện tại
             java.time.LocalDateTime now = java.time.LocalDateTime.now();
-            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                    .ofPattern("yyyy-MM-dd HH:mm:ss");
             String currentDateTime = now.format(formatter);
 
             // Update Orders
@@ -365,8 +393,10 @@ public class Order extends Application {
         btnClearOrder.setOnAction(e -> clearOrderForm());
         tvOrder.setOnMouseClicked(e -> showOrderItem());
         tvOrder.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            if (newSel != null) loadOrderDetail(newSel.getOrderID());
-            else dataOrderDetail.clear();
+            if (newSel != null)
+                loadOrderDetail(newSel.getOrderID());
+            else
+                dataOrderDetail.clear();
         });
         loadOrder();
         loadOrderDetail();
@@ -461,6 +491,7 @@ public class Order extends Application {
             e.printStackTrace();
         }
     }
+
     private static void loadStaffIDs() {
         cbStaffID.getItems().clear();
         try (Connection conn = MySQLConnection.getConnection()) {
@@ -498,23 +529,48 @@ public class Order extends Application {
         private final SimpleStringProperty bookID;
         private final SimpleIntegerProperty quantity;
         private final SimpleFloatProperty unitPrice;
+
         public OrderDetailRow(String orderID, String bookID, int quantity, float unitPrice) {
             this.orderID = new SimpleStringProperty(orderID);
             this.bookID = new SimpleStringProperty(bookID);
             this.quantity = new SimpleIntegerProperty(quantity);
             this.unitPrice = new SimpleFloatProperty(unitPrice);
         }
-        public String getOrderID() { return orderID.get(); }
-        public String getBookID() { return bookID.get(); }
-        public int getQuantity() { return quantity.get(); }
-        public float getUnitPrice() { return unitPrice.get(); }
-        public SimpleStringProperty orderIDProperty() { return orderID; }
-        public SimpleStringProperty bookIDProperty() { return bookID; }
-        public SimpleIntegerProperty quantityProperty() { return quantity; }
-        public SimpleFloatProperty unitPriceProperty() { return unitPrice; }
+
+        public String getOrderID() {
+            return orderID.get();
+        }
+
+        public String getBookID() {
+            return bookID.get();
+        }
+
+        public int getQuantity() {
+            return quantity.get();
+        }
+
+        public float getUnitPrice() {
+            return unitPrice.get();
+        }
+
+        public SimpleStringProperty orderIDProperty() {
+            return orderID;
+        }
+
+        public SimpleStringProperty bookIDProperty() {
+            return bookID;
+        }
+
+        public SimpleIntegerProperty quantityProperty() {
+            return quantity;
+        }
+
+        public SimpleFloatProperty unitPriceProperty() {
+            return unitPrice;
+        }
     }
 
     public static void main(String[] args) {
         launch();
     }
-} 
+}

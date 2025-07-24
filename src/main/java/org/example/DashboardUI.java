@@ -35,7 +35,7 @@ public class DashboardUI extends Application {
         Button dashboardButton = createNavButton("Dashboard");
         Button storageButton = createNavButton("Quản lý kho");
         Button productButton = createNavButton("Quản lý sản phẩm");
-        Button staffButton = createNavButton("Quản lý nhân viên");
+        Button staffButton = createNavButton("Quản lý người dùng");
         Button ordersButton = createNavButton("Quản lý hóa đơn");
 
         Button[] buttons = { dashboardButton, storageButton, productButton, staffButton, ordersButton };
